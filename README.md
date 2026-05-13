@@ -1,4 +1,4 @@
-# Asset Lifecycle Insight (LCCA-CPPM)
+#Lifecycle Cost Analysis and Capital Project Portfolio Management (LCCA-CPPM)
 
 A comprehensive full-stack application for **Lifecycle Cost Analysis** and **Capital Project Portfolio Management**. This system helps organizations manage assets, analyze costs, assess risks, and optimize capital decisions across their portfolio.
 
