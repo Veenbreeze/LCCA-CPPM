@@ -21,8 +21,8 @@ Complete guide for developing, testing, and contributing to Asset Lifecycle Insi
 #### 1. Clone and Setup Backend
 
 ```bash
-git clone https://github.com/Veenbreeze/asset-lifecycle-insight.git
-cd asset-lifecycle-insight/backend
+git clone https://github.com/Veenbreeze/LCCA-CPPM .git
+cd LCCA-CPPM /backend
 
 # Create virtual environment
 python -m venv venv

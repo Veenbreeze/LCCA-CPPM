@@ -29,8 +29,8 @@ A comprehensive full-stack application for **Lifecycle Cost Analysis** and **Cap
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/Veenbreeze/asset-lifecycle-insight.git
-cd asset-lifecycle-insight
+git clone https://github.com/Veenbreeze/LCCA-CPPM .git
+cd LCCA-CPPM 
 ```
 
 ### Backend Setup (Django)

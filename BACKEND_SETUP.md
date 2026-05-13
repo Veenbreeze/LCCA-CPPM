@@ -32,8 +32,8 @@ python --version
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/Veenbreeze/asset-lifecycle-insight.git
-cd asset-lifecycle-insight/backend
+git clone https://github.com/Veenbreeze/LCCA-CPPM .git
+cd LCCA-CPPM /backend
 ```
 
 ### 2. Create Virtual Environment
