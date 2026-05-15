@@ -89,7 +89,16 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   }, []);
 
   const notifications = useMemo<AppNotification[]>(() => {
+    const formatNumber = (value: unknown) => {
+      const numberValue = Number(value);
+      return Number.isFinite(numberValue) ? numberValue : 0;
+    };
+
     const riskNotifs: AppNotification[] = risks
+      .map((risk) => ({
+        ...risk,
+        computed_risk_score: formatNumber(risk.computed_risk_score),
+      }))
       .filter((risk) => risk.computed_risk_score >= 50)
       .map((risk) => ({
         id: `risk-${risk.id}`,
@@ -102,6 +111,10 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       }));
 
     const inspectionNotifs: AppNotification[] = inspections
+      .map((inspection) => ({
+        ...inspection,
+        condition_score: formatNumber(inspection.condition_score),
+      }))
       .filter((inspection) => !reviewedInspections.has(String(inspection.id)))
       .map((inspection) => ({
         id: `insp-${inspection.id}`,
