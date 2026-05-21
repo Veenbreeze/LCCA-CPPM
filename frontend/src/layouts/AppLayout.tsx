@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   LayoutDashboard, Boxes, Activity, ShieldAlert, FolderKanban,
   Calculator, FileBarChart, Search, ChevronLeft, Menu, User,
@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
+import { useAssets } from "@/hooks/useAssets";
+import { useProjects } from "@/hooks/useProjects";
+import { useReports } from "@/hooks/useReports";
 import { NotificationsBell } from "@/components/NotificationsBell";
 
 const nav = [
@@ -22,8 +25,41 @@ const nav = [
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
   const { theme, toggle } = useTheme();
+  const { assets } = useAssets();
+  const { projects } = useProjects();
+  const { reports } = useReports();
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const searchResults = useMemo(
+    () => {
+      if (!normalizedQuery) return { assets: [], projects: [], reports: [] };
+
+      return {
+        assets: assets
+          .filter((asset) =>
+            [asset.name, asset.asset_type, asset.location, String(asset.id)]
+              .some((field) => field.toLowerCase().includes(normalizedQuery))
+          )
+          .slice(0, 5),
+        projects: projects
+          .filter((project) =>
+            [project.name, project.status, project.responsible_person, String(project.budget)]
+              .some((field) => field.toLowerCase().includes(normalizedQuery))
+          )
+          .slice(0, 5),
+        reports: reports
+          .filter((report) =>
+            [report.title, report.description, report.updated].some((field) => field.toLowerCase().includes(normalizedQuery))
+          )
+          .slice(0, 5),
+      };
+    },
+    [normalizedQuery, assets, projects, reports]
+  );
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -108,9 +144,77 @@ export function AppLayout() {
           <div className="relative flex-1 max-w-md">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search assets, projects, reports…"
               className="h-10 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
             />
+
+            {searchQuery.trim() && (
+              <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-soft">
+                <div className="space-y-4 p-4 text-sm">
+                  {searchResults.assets.length || searchResults.projects.length || searchResults.reports.length ? (
+                    <>
+                      {searchResults.assets.length > 0 && (
+                        <div>
+                          <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Assets</div>
+                          <div className="space-y-1">
+                            {searchResults.assets.map((asset) => (
+                              <Link
+                                key={asset.id}
+                                to="/assets"
+                                className="block rounded-lg px-3 py-2 hover:bg-muted"
+                              >
+                                <div className="font-medium">{asset.name}</div>
+                                <div className="text-xs text-muted-foreground">{asset.asset_type} · {asset.location}</div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {searchResults.projects.length > 0 && (
+                        <div>
+                          <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Projects</div>
+                          <div className="space-y-1">
+                            {searchResults.projects.map((project) => (
+                              <Link
+                                key={project.id}
+                                to="/projects"
+                                className="block rounded-lg px-3 py-2 hover:bg-muted"
+                              >
+                                <div className="font-medium">{project.name}</div>
+                                <div className="text-xs text-muted-foreground">{project.status} · ${Number(project.budget).toLocaleString()}</div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {searchResults.reports.length > 0 && (
+                        <div>
+                          <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Reports</div>
+                          <div className="space-y-1">
+                            {searchResults.reports.map((report) => (
+                              <Link
+                                key={report.id}
+                                to="/reports"
+                                className="block rounded-lg px-3 py-2 hover:bg-muted"
+                              >
+                                <div className="font-medium">{report.title}</div>
+                                <div className="text-xs text-muted-foreground">{report.description}</div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">No matching assets, projects, or reports.</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="ml-auto flex items-center gap-2">

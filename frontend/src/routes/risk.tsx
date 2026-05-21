@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { PageHeader, Card, CardTitle, Badge, Alert } from "@/components/ui-kit";
 import { useRisk } from "@/hooks/useRisk";
 import { useAssets } from "@/hooks/useAssets";
@@ -19,6 +19,7 @@ const levelVariant = (level: string) =>
 function RiskPage() {
   const { risks, loading, error } = useRisk();
   const { assets } = useAssets();
+  const [query, setQuery] = useState("");
 
   const assetMap = useMemo(() => new Map(assets.map((asset) => [asset.id, asset.name])), [assets]);
 
@@ -60,11 +61,34 @@ function RiskPage() {
     [enrichedRisks]
   );
 
+  const filteredRisks = useMemo(() => {
+    const search = query.trim().toLowerCase();
+    if (!search) return enrichedRisks;
+    return enrichedRisks.filter(
+      (risk) =>
+        risk.asset_name.toLowerCase().includes(search) ||
+        String(risk.computed_risk_score).toLowerCase().includes(search) ||
+        risk.level.toLowerCase().includes(search)
+    );
+  }, [enrichedRisks, query]);
+
   return (
     <div>
       <PageHeader title="Risk & Prioritization" subtitle="Probability × Consequence ranking across portfolio" />
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}
+
+      <div className="mt-6 relative">
+        <div className="relative max-w-md">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔎</span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search risk by asset, score, or level…"
+            className="h-10 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {(["Critical", "High", "Medium", "Low"] as const).map((level) => (
@@ -92,7 +116,7 @@ function RiskPage() {
               </tr>
             </thead>
             <tbody>
-              {enrichedRisks.map((risk, index) => (
+              {filteredRisks.map((risk, index) => (
                 <tr key={risk.id} className="border-b border-border hover:bg-muted/40">
                   <td className="px-3 py-3 font-mono text-xs">#{index + 1}</td>
                   <td className="px-3 py-3 font-medium">{risk.asset_name}</td>
@@ -110,6 +134,13 @@ function RiskPage() {
                   </td>
                 </tr>
               ))}
+              {!loading && filteredRisks.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-3 py-8 text-center text-sm text-muted-foreground">
+                    No risk records match your search.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
