@@ -78,7 +78,7 @@ export function AppLayout() {
             </div>
             {!collapsed && (
               <div className="leading-tight">
-                <div className="text-sm font-semibold">LCA·CPPM</div>
+                <div className="text-sm font-semibold">LCCA·CPPM</div>
                 <div className="text-[10px] text-sidebar-foreground/60">Lifecycle & Capital</div>
               </div>
             )}
