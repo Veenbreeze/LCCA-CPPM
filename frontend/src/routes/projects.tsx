@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
@@ -12,7 +13,13 @@ export const Route = createFileRoute("/projects")({ component: ProjectsPage });
 type ProjectForm = Omit<ProjectRecord, "id">;
 
 const statusVariant = (status: ProjectRecord["status"]) =>
-  status === "Completed" ? "success" : status === "In Progress" ? "info" : status === "On Hold" ? "warning" : "muted";
+  status === "Completed"
+    ? "success"
+    : status === "In Progress"
+      ? "info"
+      : status === "On Hold"
+        ? "warning"
+        : "muted";
 
 function ProjectsPage() {
   const { projects, loading, error, create, update, remove } = useProjects();
@@ -25,7 +32,10 @@ function ProjectsPage() {
   const assetMap = useMemo(() => new Map(assets.map((asset) => [asset.id, asset.name])), [assets]);
 
   const resourceSpan = useMemo(() => {
-    const dates = projects.flatMap((project) => [new Date(project.start_date), new Date(project.end_date)]);
+    const dates = projects.flatMap((project) => [
+      new Date(project.start_date),
+      new Date(project.end_date),
+    ]);
     if (!dates.length) return { minDate: new Date(), maxDate: new Date() };
     return {
       minDate: new Date(Math.min(...dates.map((date) => date.getTime()))),
@@ -34,9 +44,13 @@ function ProjectsPage() {
   }, [projects]);
 
   const offsetPct = (date: Date) =>
-    ((date.getTime() - resourceSpan.minDate.getTime()) / (resourceSpan.maxDate.getTime() - resourceSpan.minDate.getTime())) * 100;
+    ((date.getTime() - resourceSpan.minDate.getTime()) /
+      (resourceSpan.maxDate.getTime() - resourceSpan.minDate.getTime())) *
+    100;
   const widthPct = (start: Date, end: Date) =>
-    ((end.getTime() - start.getTime()) / (resourceSpan.maxDate.getTime() - resourceSpan.minDate.getTime())) * 100;
+    ((end.getTime() - start.getTime()) /
+      (resourceSpan.maxDate.getTime() - resourceSpan.minDate.getTime())) *
+    100;
 
   const onSubmit = async (payload: ProjectForm) => {
     setFormError(null);
@@ -94,11 +108,16 @@ function ProjectsPage() {
         <div className="space-y-3">
           {timelineProjects.map((project) => (
             <div key={project.id} className="grid grid-cols-12 items-center gap-3">
-              <div className="col-span-4 sm:col-span-3 truncate text-sm font-medium">{project.name}</div>
+              <div className="col-span-4 sm:col-span-3 truncate text-sm font-medium">
+                {project.name}
+              </div>
               <div className="col-span-8 sm:col-span-9 relative h-7 rounded-md bg-muted/50">
                 <div
                   className="absolute top-0 h-7 rounded-md bg-primary/80 text-primary-foreground shadow-soft flex items-center px-2"
-                  style={{ left: `${offsetPct(new Date(project.start_date))}%`, width: `${widthPct(new Date(project.start_date), new Date(project.end_date))}%` }}
+                  style={{
+                    left: `${offsetPct(new Date(project.start_date))}%`,
+                    width: `${widthPct(new Date(project.start_date), new Date(project.end_date))}%`,
+                  }}
                   title={`${project.start_date} → ${project.end_date}`}
                 >
                   <span className="text-[10px] font-medium truncate">
@@ -109,7 +128,9 @@ function ProjectsPage() {
             </div>
           ))}
           {!timelineProjects.length && (
-            <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">No project timeline data yet.</div>
+            <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
+              No project timeline data yet.
+            </div>
           )}
         </div>
       </Card>
@@ -133,11 +154,17 @@ function ProjectsPage() {
               {projects.map((project) => (
                 <tr key={project.id} className="border-b border-border hover:bg-muted/40">
                   <td className="px-3 py-3 font-medium">{project.name}</td>
-                  <td className="px-3 py-3 text-muted-foreground">{assetMap.get(project.asset) ?? project.asset}</td>
+                  <td className="px-3 py-3 text-muted-foreground">
+                    {assetMap.get(project.asset) ?? project.asset}
+                  </td>
                   <td className="px-3 py-3">${Number(project.budget).toLocaleString()}</td>
-                  <td className="px-3 py-3 text-xs text-muted-foreground">{project.start_date} → {project.end_date}</td>
+                  <td className="px-3 py-3 text-xs text-muted-foreground">
+                    {project.start_date} → {project.end_date}
+                  </td>
                   <td className="px-3 py-3 text-muted-foreground">{project.responsible_person}</td>
-                  <td className="px-3 py-3"><Badge variant={statusVariant(project.status) as any}>{project.status}</Badge></td>
+                  <td className="px-3 py-3">
+                    <Badge variant={statusVariant(project.status) as any}>{project.status}</Badge>
+                  </td>
                   <td className="px-3 py-3 text-right">
                     <div className="flex justify-end gap-1">
                       <button
@@ -226,7 +253,7 @@ function ProjectModal({
           end_date: new Date().toISOString().slice(0, 10),
           status: "Planning",
           responsible_person: "",
-        }
+        },
   );
 
   return (
@@ -234,7 +261,12 @@ function ProjectModal({
       <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">{initial ? "Edit Project" : "New Project"}</h2>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted">
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            title="Close"
+            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -322,10 +354,18 @@ function ProjectModal({
             </select>
           </Label>
           <div className="col-span-2 mt-2 flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={submitting} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+            >
               {submitting ? "Saving…" : "Save"}
             </button>
           </div>
@@ -335,7 +375,15 @@ function ProjectModal({
   );
 }
 
-function Label({ field, children, full }: { field: string; children: React.ReactNode; full?: boolean }) {
+function Label({
+  field,
+  children,
+  full,
+}: {
+  field: string;
+  children: React.ReactNode;
+  full?: boolean;
+}) {
   return (
     <label className={`flex flex-col gap-1 ${full ? "col-span-2" : ""}`}>
       <span className="text-xs font-medium text-muted-foreground">{field}</span>

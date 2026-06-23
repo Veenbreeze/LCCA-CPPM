@@ -19,16 +19,19 @@ export function useRisk() {
     }
   }, []);
 
-  const update = useCallback(async (id: number | string, payload: Partial<Omit<RiskRecord, "id">>) => {
-    setLoading(true);
-    try {
-      const updated = await RiskService.update(id, payload);
-      setRisks((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-      return updated;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const update = useCallback(
+    async (id: number | string, payload: Partial<Omit<RiskRecord, "id">>) => {
+      setLoading(true);
+      try {
+        const updated = await RiskService.update(id, payload);
+        setRisks((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+        return updated;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   const remove = useCallback(async (id: number | string) => {
     setLoading(true);

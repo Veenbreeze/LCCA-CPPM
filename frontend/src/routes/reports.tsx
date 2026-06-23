@@ -53,7 +53,9 @@ function ReportsPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {loading ? (
-          <Card className="col-span-3 p-6 text-center text-sm text-muted-foreground">Loading reports…</Card>
+          <Card className="col-span-3 p-6 text-center text-sm text-muted-foreground">
+            Loading reports…
+          </Card>
         ) : reports.length ? (
           reports.map((report) => (
             <Card key={report.id} className="flex flex-col">
@@ -70,17 +72,25 @@ function ReportsPage() {
                 <Badge variant="muted">Updated {report.updated}</Badge>
               </div>
               <div className="mt-4 flex gap-2">
-                <button onClick={() => download(report.id, "pdf")} className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:opacity-90">
+                <button
+                  onClick={() => download(report.id, "pdf")}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:opacity-90"
+                >
                   <Download className="h-3.5 w-3.5" /> PDF
                 </button>
-                <button onClick={() => download(report.id, "csv")} className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted">
+                <button
+                  onClick={() => download(report.id, "csv")}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted"
+                >
                   <FileSpreadsheet className="h-3.5 w-3.5" /> CSV
                 </button>
               </div>
             </Card>
           ))
         ) : (
-          <Card className="col-span-3 p-6 text-center text-sm text-muted-foreground">No reports are available.</Card>
+          <Card className="col-span-3 p-6 text-center text-sm text-muted-foreground">
+            No reports are available.
+          </Card>
         )}
       </div>
     </div>

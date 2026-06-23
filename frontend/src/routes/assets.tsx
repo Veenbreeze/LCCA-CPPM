@@ -31,9 +31,9 @@ function AssetsPage() {
           (filterType === "All" || asset.asset_type === filterType) &&
           (asset.name.toLowerCase().includes(query.toLowerCase()) ||
             String(asset.id).toLowerCase().includes(query.toLowerCase()) ||
-            asset.location.toLowerCase().includes(query.toLowerCase()))
+            asset.location.toLowerCase().includes(query.toLowerCase())),
       ),
-    [assets, filterType, query]
+    [assets, filterType, query],
   );
 
   const onDelete = async (id: number) => {
@@ -144,8 +144,8 @@ function AssetsPage() {
                               ? asset.condition_rating <= 2
                                 ? "bg-destructive"
                                 : asset.condition_rating < 4
-                                ? "bg-warning"
-                                : "bg-success"
+                                  ? "bg-warning"
+                                  : "bg-success"
                               : "bg-muted"
                           }`}
                         />
@@ -240,7 +240,7 @@ function AssetModal({
           condition_rating: 3,
           remaining_useful_life: 8,
           status: "Operational",
-        }
+        },
   );
 
   return (
@@ -248,7 +248,11 @@ function AssetModal({
       <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">{initial ? "Edit Asset" : "Add Asset"}</h2>
-          <button aria-label="Close asset form" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted">
+          <button
+            aria-label="Close asset form"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -339,7 +343,11 @@ function AssetModal({
             />
           </Field>
           <div className="col-span-2 mt-2 flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+            >
               Cancel
             </button>
             <button
@@ -357,7 +365,15 @@ function AssetModal({
   );
 }
 
-function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+function Field({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <label className={`flex flex-col gap-1 ${className}`}>
       <span className="text-xs font-medium text-muted-foreground">{label}</span>

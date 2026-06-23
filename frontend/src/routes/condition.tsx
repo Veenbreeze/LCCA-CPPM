@@ -1,6 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  ReferenceLine,
+} from "recharts";
 import { Plus, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Card, CardTitle, Badge, Alert } from "@/components/ui-kit";
@@ -60,15 +69,20 @@ function ConditionPage() {
 
   return (
     <div>
-      <PageHeader title="Condition & Remaining Useful Life" subtitle="Inspection records and degradation analytics" />
+      <PageHeader
+        title="Condition & Remaining Useful Life"
+        subtitle="Inspection records and degradation analytics"
+      />
 
-      {(assetsError || conditionError) ? (
+      {assetsError || conditionError ? (
         <Alert variant="destructive">{assetsError || conditionError}</Alert>
       ) : null}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardTitle action={<Badge variant="info">Asset health</Badge>}>Condition Trend (last 7 yrs)</CardTitle>
+          <CardTitle action={<Badge variant="info">Asset health</Badge>}>
+            Condition Trend (last 7 yrs)
+          </CardTitle>
           <div className="h-72">
             <ResponsiveContainer>
               <LineChart
@@ -79,11 +93,38 @@ function ConditionPage() {
                 margin={{ top: 8, right: 12, left: -16, bottom: 0 }}
               >
                 <CartesianGrid stroke="oklch(0.92 0.01 250)" vertical={false} />
-                <XAxis dataKey="year" tick={{ fontSize: 12, fill: "oklch(0.52 0.03 250)" }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 5]} tick={{ fontSize: 12, fill: "oklch(0.52 0.03 250)" }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid oklch(0.92 0.01 250)", fontSize: 12 }} />
-                <ReferenceLine y={2} stroke="oklch(0.58 0.22 25)" strokeDasharray="4 4" label={{ value: "Threshold", fontSize: 10, fill: "oklch(0.58 0.22 25)" }} />
-                <Line type="monotone" dataKey="score" stroke="oklch(0.52 0.20 254)" strokeWidth={2.5} dot={{ r: 4 }} />
+                <XAxis
+                  dataKey="year"
+                  tick={{ fontSize: 12, fill: "oklch(0.52 0.03 250)" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  domain={[0, 5]}
+                  tick={{ fontSize: 12, fill: "oklch(0.52 0.03 250)" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 8,
+                    border: "1px solid oklch(0.92 0.01 250)",
+                    fontSize: 12,
+                  }}
+                />
+                <ReferenceLine
+                  y={2}
+                  stroke="oklch(0.58 0.22 25)"
+                  strokeDasharray="4 4"
+                  label={{ value: "Threshold", fontSize: 10, fill: "oklch(0.58 0.22 25)" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="score"
+                  stroke="oklch(0.52 0.20 254)"
+                  strokeWidth={2.5}
+                  dot={{ r: 4 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -176,14 +217,26 @@ function ConditionPage() {
                 return (
                   <tr key={record.id} className="border-b border-border hover:bg-muted/40">
                     <td className="px-3 py-3 font-mono text-xs">{record.id}</td>
-                    <td className="px-3 py-3 font-medium">{assetMap.get(record.asset) ?? record.asset}</td>
+                    <td className="px-3 py-3 font-medium">
+                      {assetMap.get(record.asset) ?? record.asset}
+                    </td>
                     <td className="px-3 py-3 text-muted-foreground">{record.inspection_date}</td>
                     <td className="px-3 py-3">
-                      <Badge variant={record.condition_score < 2 ? "destructive" : record.condition_score < 3 ? "warning" : "success"}>
+                      <Badge
+                        variant={
+                          record.condition_score < 2
+                            ? "destructive"
+                            : record.condition_score < 3
+                              ? "warning"
+                              : "success"
+                        }
+                      >
                         {Number(record.condition_score).toFixed(1)}
                       </Badge>
                     </td>
-                    <td className="px-3 py-3 text-muted-foreground max-w-md truncate">{record.notes}</td>
+                    <td className="px-3 py-3 text-muted-foreground max-w-md truncate">
+                      {record.notes}
+                    </td>
                     <td className="px-3 py-3 text-right">
                       {reviewed ? (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
@@ -193,7 +246,9 @@ function ConditionPage() {
                         <button
                           onClick={() => {
                             markInspectionReviewed(String(record.id));
-                            toast.success("Inspection marked reviewed", { description: assetMap.get(record.asset) ?? String(record.asset) });
+                            toast.success("Inspection marked reviewed", {
+                              description: assetMap.get(record.asset) ?? String(record.asset),
+                            });
                           }}
                           className="inline-flex items-center gap-1 rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium hover:bg-muted"
                         >

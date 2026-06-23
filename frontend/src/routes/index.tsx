@@ -22,7 +22,13 @@ import { useNotifications } from "@/hooks/use-notifications";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
 
-const COLORS = ["oklch(0.62 0.16 155)", "oklch(0.52 0.20 254)", "oklch(0.75 0.16 75)", "oklch(0.58 0.22 25)", "oklch(0.55 0.18 295)"];
+const COLORS = [
+  "oklch(0.62 0.16 155)",
+  "oklch(0.52 0.20 254)",
+  "oklch(0.75 0.16 75)",
+  "oklch(0.58 0.22 25)",
+  "oklch(0.55 0.18 295)",
+];
 
 const formatLevel = (score: number) => {
   if (score >= 100) return "Critical";
@@ -53,7 +59,10 @@ function Dashboard() {
     count: assets.filter((asset) => Math.round(Number(asset.condition_rating)) === rating).length,
   }));
 
-  const capexAllocation = projects.map((project) => ({ name: project.name.split(" ")[0], value: Number(project.budget) }));
+  const capexAllocation = projects.map((project) => ({
+    name: project.name.split(" ")[0],
+    value: Number(project.budget),
+  }));
 
   const heatmap = Array.from({ length: 5 }, (_, pofIdx) =>
     Array.from({ length: 5 }, (_, cofIdx) => {
@@ -62,9 +71,9 @@ function Dashboard() {
       return risks.filter(
         (risk) =>
           Math.min(5, Math.max(1, Math.round(Number(risk.probability_of_failure)))) === pof &&
-          Math.min(5, Math.max(1, Math.round(Number(risk.consequence_of_failure)))) === cof
+          Math.min(5, Math.max(1, Math.round(Number(risk.consequence_of_failure)))) === cof,
       ).length;
-    })
+    }),
   );
 
   const recentActivities = useMemo(
@@ -87,7 +96,7 @@ function Dashboard() {
       ]
         .sort((a, b) => b.time.localeCompare(a.time))
         .slice(0, 5),
-    [inspections, risks]
+    [inspections, risks],
   );
 
   return (
@@ -138,14 +147,32 @@ function Dashboard() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardTitle action={<Badge variant="muted">Live</Badge>}>Asset Condition Distribution</CardTitle>
+          <CardTitle action={<Badge variant="muted">Live</Badge>}>
+            Asset Condition Distribution
+          </CardTitle>
           <div className="h-72">
             <ResponsiveContainer>
               <BarChart data={conditionDist} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
                 <CartesianGrid stroke="oklch(0.92 0.01 250)" vertical={false} />
-                <XAxis dataKey="rating" tick={{ fontSize: 12, fill: "oklch(0.52 0.03 250)" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 12, fill: "oklch(0.52 0.03 250)" }} axisLine={false} tickLine={false} />
-                <Tooltip cursor={{ fill: "oklch(0.96 0.012 250)" }} contentStyle={{ borderRadius: 8, border: "1px solid oklch(0.92 0.01 250)", fontSize: 12 }} />
+                <XAxis
+                  dataKey="rating"
+                  tick={{ fontSize: 12, fill: "oklch(0.52 0.03 250)" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: "oklch(0.52 0.03 250)" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "oklch(0.96 0.012 250)" }}
+                  contentStyle={{
+                    borderRadius: 8,
+                    border: "1px solid oklch(0.92 0.01 250)",
+                    fontSize: 12,
+                  }}
+                />
                 <Bar dataKey="count" fill="oklch(0.52 0.20 254)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -157,12 +184,25 @@ function Dashboard() {
           <div className="h-72">
             <ResponsiveContainer>
               <PieChart>
-                <Pie data={capexAllocation} dataKey="value" nameKey="name" innerRadius={50} outerRadius={85} paddingAngle={2}>
+                <Pie
+                  data={capexAllocation}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={50}
+                  outerRadius={85}
+                  paddingAngle={2}
+                >
                   {capexAllocation.map((_, index) => (
                     <Cell key={index} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid oklch(0.92 0.01 250)", fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 8,
+                    border: "1px solid oklch(0.92 0.01 250)",
+                    fontSize: 12,
+                  }}
+                />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
@@ -192,7 +232,14 @@ function Dashboard() {
                     <div className="w-8 text-[10px] text-muted-foreground">PoF {pof}</div>
                     {row.map((cell, cofIndex) => {
                       const score = pof * (cofIndex + 1);
-                      const bg = score >= 20 ? "bg-destructive" : score >= 12 ? "bg-warning" : score >= 6 ? "bg-info" : "bg-success";
+                      const bg =
+                        score >= 20
+                          ? "bg-destructive"
+                          : score >= 12
+                            ? "bg-warning"
+                            : score >= 6
+                              ? "bg-info"
+                              : "bg-success";
                       return (
                         <div
                           key={cofIndex}
@@ -209,7 +256,11 @@ function Dashboard() {
         </Card>
 
         <Card className="lg:col-span-2">
-          <CardTitle action={<button className="text-xs font-medium text-primary hover:underline">View all</button>}>
+          <CardTitle
+            action={
+              <button className="text-xs font-medium text-primary hover:underline">View all</button>
+            }
+          >
             Recent Activity
           </CardTitle>
           <div className="-mx-2 overflow-x-auto">
@@ -228,7 +279,9 @@ function Dashboard() {
                     <td className="px-2 py-3 font-medium text-foreground">{activity.action}</td>
                     <td className="px-2 py-3 text-muted-foreground">{activity.target}</td>
                     <td className="px-2 py-3 text-muted-foreground">{activity.user}</td>
-                    <td className="px-2 py-3 text-right text-xs text-muted-foreground">{activity.time}</td>
+                    <td className="px-2 py-3 text-right text-xs text-muted-foreground">
+                      {activity.time}
+                    </td>
                   </tr>
                 ))}
               </tbody>

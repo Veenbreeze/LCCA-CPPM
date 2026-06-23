@@ -2,8 +2,14 @@ import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function PageHeader({
-  title, subtitle, actions,
-}: { title: string; subtitle?: string; actions?: ReactNode }) {
+  title,
+  subtitle,
+  actions,
+}: {
+  title: string;
+  subtitle?: string;
+  actions?: ReactNode;
+}) {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
@@ -16,9 +22,16 @@ export function PageHeader({
 }
 
 export function StatCard({
-  label, value, hint, trend, icon: Icon, accent = "primary",
+  label,
+  value,
+  hint,
+  trend,
+  icon: Icon,
+  accent = "primary",
 }: {
-  label: string; value: string; hint?: string;
+  label: string;
+  value: string;
+  hint?: string;
   trend?: { value: string; positive?: boolean };
   icon?: React.ComponentType<{ className?: string }>;
   accent?: "primary" | "success" | "warning" | "destructive";
@@ -33,19 +46,30 @@ export function StatCard({
     <div className="rounded-xl border border-border bg-card p-5 shadow-soft">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
+          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            {label}
+          </div>
           <div className="mt-2 text-2xl font-bold tracking-tight text-foreground">{value}</div>
           {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
         </div>
         {Icon && (
-          <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", accentMap[accent])}>
+          <div
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-lg",
+              accentMap[accent],
+            )}
+          >
             <Icon className="h-5 w-5" />
           </div>
         )}
       </div>
       {trend && (
-        <div className={cn("mt-3 inline-flex items-center gap-1 text-xs font-medium",
-          trend.positive ? "text-success" : "text-destructive")}>
+        <div
+          className={cn(
+            "mt-3 inline-flex items-center gap-1 text-xs font-medium",
+            trend.positive ? "text-success" : "text-destructive",
+          )}
+        >
           {trend.value}
         </div>
       )}
@@ -71,8 +95,12 @@ export function CardTitle({ children, action }: { children: ReactNode; action?: 
 }
 
 export function Badge({
-  children, variant = "default",
-}: { children: ReactNode; variant?: "default" | "success" | "warning" | "destructive" | "info" | "muted" }) {
+  children,
+  variant = "default",
+}: {
+  children: ReactNode;
+  variant?: "default" | "success" | "warning" | "destructive" | "info" | "muted";
+}) {
   const map = {
     default: "bg-primary/10 text-primary",
     success: "bg-success/10 text-success",
@@ -82,7 +110,12 @@ export function Badge({
     muted: "bg-muted text-muted-foreground",
   };
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", map[variant])}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        map[variant],
+      )}
+    >
       {children}
     </span>
   );

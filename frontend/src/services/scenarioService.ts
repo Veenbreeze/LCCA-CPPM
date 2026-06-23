@@ -11,7 +11,10 @@ export type ScenarioRecord = {
 };
 
 export const ScenarioService = {
-  list: () => api.get<ScenarioRecord[] | { results: ScenarioRecord[] }>("/scenarios/").then((r) => getListData(r.data)),
+  list: () =>
+    api
+      .get<ScenarioRecord[] | { results: ScenarioRecord[] }>("/scenarios/")
+      .then((r) => getListData(r.data)),
   get: (id: number | string) => api.get<ScenarioRecord>(`/scenarios/${id}/`).then((r) => r.data),
   create: (payload: Omit<ScenarioRecord, "id" | "npv">) =>
     api.post<ScenarioRecord>("/scenarios/", payload).then((r) => r.data),

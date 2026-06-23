@@ -8,7 +8,10 @@ export type ReportSummary = {
 };
 
 export const ReportService = {
-  list: () => api.get<ReportSummary[] | { results: ReportSummary[] }>("/reports/").then((r) => getListData(r.data)),
+  list: () =>
+    api
+      .get<ReportSummary[] | { results: ReportSummary[] }>("/reports/")
+      .then((r) => getListData(r.data)),
   exportReport: (id: number, format: "pdf" | "csv") =>
     api
       .get<Blob>(`/reports/${id}/export/`, { params: { format }, responseType: "blob" })

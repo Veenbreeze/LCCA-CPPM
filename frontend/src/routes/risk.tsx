@@ -14,7 +14,13 @@ const formatLevel = (score: number) => {
 };
 
 const levelVariant = (level: string) =>
-  level === "Critical" ? "destructive" : level === "High" ? "destructive" : level === "Medium" ? "warning" : "success";
+  level === "Critical"
+    ? "destructive"
+    : level === "High"
+      ? "destructive"
+      : level === "Medium"
+        ? "warning"
+        : "success";
 
 function RiskPage() {
   const { risks, loading, error } = useRisk();
@@ -32,7 +38,7 @@ function RiskPage() {
           level: formatLevel(Number(risk.computed_risk_score)),
         }))
         .sort((a, b) => Number(b.computed_risk_score) - Number(a.computed_risk_score)),
-    [assetMap, risks]
+    [assetMap, risks],
   );
 
   const counts = useMemo(
@@ -42,7 +48,7 @@ function RiskPage() {
       Medium: enrichedRisks.filter((risk) => risk.level === "Medium").length,
       Low: enrichedRisks.filter((risk) => risk.level === "Low").length,
     }),
-    [enrichedRisks]
+    [enrichedRisks],
   );
 
   const heatmap = useMemo(
@@ -54,11 +60,11 @@ function RiskPage() {
           return enrichedRisks.filter(
             (risk) =>
               Math.min(5, Math.max(1, Math.round(Number(risk.probability_of_failure)))) === pof &&
-              Math.min(5, Math.max(1, Math.round(Number(risk.consequence_of_failure)))) === cof
+              Math.min(5, Math.max(1, Math.round(Number(risk.consequence_of_failure)))) === cof,
           ).length;
-        })
+        }),
       ),
-    [enrichedRisks]
+    [enrichedRisks],
   );
 
   const filteredRisks = useMemo(() => {
@@ -68,19 +74,24 @@ function RiskPage() {
       (risk) =>
         risk.asset_name.toLowerCase().includes(search) ||
         String(risk.computed_risk_score).toLowerCase().includes(search) ||
-        risk.level.toLowerCase().includes(search)
+        risk.level.toLowerCase().includes(search),
     );
   }, [enrichedRisks, query]);
 
   return (
     <div>
-      <PageHeader title="Risk & Prioritization" subtitle="Probability × Consequence ranking across portfolio" />
+      <PageHeader
+        title="Risk & Prioritization"
+        subtitle="Probability × Consequence ranking across portfolio"
+      />
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}
 
       <div className="mt-6 relative">
         <div className="relative max-w-md">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔎</span>
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            🔎
+          </span>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -93,9 +104,15 @@ function RiskPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {(["Critical", "High", "Medium", "Low"] as const).map((level) => (
           <Card key={level}>
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{level}</div>
-            <div className="mt-2 text-3xl font-bold tracking-tight">{loading ? "…" : counts[level]}</div>
-            <div className="mt-2"><Badge variant={levelVariant(level) as any}>{level} risk</Badge></div>
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {level}
+            </div>
+            <div className="mt-2 text-3xl font-bold tracking-tight">
+              {loading ? "…" : counts[level]}
+            </div>
+            <div className="mt-2">
+              <Badge variant={levelVariant(level) as any}>{level} risk</Badge>
+            </div>
           </Card>
         ))}
       </div>
@@ -122,13 +139,19 @@ function RiskPage() {
                   <td className="px-3 py-3 font-medium">{risk.asset_name}</td>
                   <td className="px-3 py-3">{Number(risk.probability_of_failure).toFixed(1)}</td>
                   <td className="px-3 py-3">{Number(risk.consequence_of_failure).toFixed(1)}</td>
-                  <td className="px-3 py-3 font-semibold">{Number(risk.computed_risk_score).toFixed(1)}</td>
-                  <td className="px-3 py-3"><Badge variant={levelVariant(risk.level) as any}>{risk.level}</Badge></td>
+                  <td className="px-3 py-3 font-semibold">
+                    {Number(risk.computed_risk_score).toFixed(1)}
+                  </td>
+                  <td className="px-3 py-3">
+                    <Badge variant={levelVariant(risk.level) as any}>{risk.level}</Badge>
+                  </td>
                   <td className="px-3 py-3 w-48">
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                       <div
                         className={`h-full ${risk.level === "Critical" || risk.level === "High" ? "bg-destructive" : risk.level === "Medium" ? "bg-warning" : "bg-success"}`}
-                        style={{ width: `${Math.min(100, (Number(risk.computed_risk_score) / 125) * 100)}%` }}
+                        style={{
+                          width: `${Math.min(100, (Number(risk.computed_risk_score) / 125) * 100)}%`,
+                        }}
                       />
                     </div>
                   </td>

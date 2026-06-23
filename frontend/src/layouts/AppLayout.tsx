@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
@@ -11,7 +12,7 @@ import { useAssets } from "@/hooks/useAssets";
 import { useProjects } from "@/hooks/useProjects";
 import { useReports } from "@/hooks/useReports";
 import { NotificationsBell } from "@/components/NotificationsBell";
-
+ 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/assets", label: "Asset Management", icon: Boxes },
@@ -78,13 +79,16 @@ export function AppLayout() {
             </div>
             {!collapsed && (
               <div className="leading-tight">
-                <div className="text-sm font-semibold">LCCA·CPPM</div>
-                <div className="text-[10px] text-sidebar-foreground/60">Lifecycle & Capital</div>
+                <div className="text-sm font-semibold">LCCA&CPPM</div>
+                <div className="text-[10px] text-sidebar-foreground/60"> Build differently,not perfectly </div>
               </div>
             )}
           </Link>
           <button
+            type="button"
             onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md hover:bg-sidebar-accent"
           >
             <ChevronLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
@@ -135,13 +139,16 @@ export function AppLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur lg:px-6">
           <button
+            type="button"
             onClick={() => setMobileOpen(true)}
+            aria-label="Open navigation menu"
+            title="Open navigation menu"
             className="lg:hidden flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
           >
             <Menu className="h-5 w-5" />
           </button>
 
-          <div className="relative flex-1 max-w-md">
+          {/* <div className="relative flex-1 max-w-md">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={searchQuery}
@@ -215,7 +222,7 @@ export function AppLayout() {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="ml-auto flex items-center gap-2">
             <button
