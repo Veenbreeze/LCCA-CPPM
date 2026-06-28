@@ -200,7 +200,7 @@ function ConditionPage() {
       <Card className="mt-6">
         <CardTitle>Inspection Records</CardTitle>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-shell">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                 <th className="px-3 py-3 font-medium">Record</th>

@@ -138,7 +138,7 @@ function ProjectsPage() {
       <Card>
         <CardTitle>All Projects</CardTitle>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-shell">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                 <th className="px-3 py-3 font-medium">Project</th>
@@ -239,6 +239,7 @@ function ProjectModal({
       ? {
           name: initial.name,
           asset: initial.asset,
+          scope_description: initial.scope_description ?? "",
           budget: Number(initial.budget),
           start_date: initial.start_date,
           end_date: initial.end_date,
@@ -248,6 +249,7 @@ function ProjectModal({
       : {
           name: "",
           asset: assets[0]?.id ?? 0,
+          scope_description: "",
           budget: 0,
           start_date: new Date().toISOString().slice(0, 10),
           end_date: new Date().toISOString().slice(0, 10),
@@ -257,8 +259,8 @@ function ProjectModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-deep">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">{initial ? "Edit Project" : "New Project"}</h2>
           <button
@@ -352,6 +354,17 @@ function ProjectModal({
               <option>On Hold</option>
               <option>Completed</option>
             </select>
+          </Label>
+          <Label field="Scope Description" full>
+            <textarea
+              aria-label="Project scope description"
+              placeholder="Describe the project scope: deliverables, boundaries, exclusions…"
+              value={form.scope_description}
+              onChange={(e) => setForm({ ...form, scope_description: e.target.value })}
+              rows={4}
+              className="input"
+              style={{ height: "auto", minHeight: 90, padding: "8px 10px" }}
+            />
           </Label>
           <div className="col-span-2 mt-2 flex justify-end gap-2">
             <button

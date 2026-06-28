@@ -7,3 +7,4 @@ django-filter>=23.0
 dj-database-url>=1.0
 django-cors-headers>=4.0
 python-decorators>=0.2.5
+reportlab>=4.0

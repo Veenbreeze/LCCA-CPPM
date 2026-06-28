@@ -15,13 +15,14 @@ import { toast } from "sonner";
 import { PageHeader, Card, CardTitle, StatCard, Badge, Alert } from "@/components/ui-kit";
 import { useScenarios } from "@/hooks/useScenarios";
 import { useAssets } from "@/hooks/useAssets";
-import { type ScenarioRecord } from "@/services/scenarioService";
+import {
+  type ScenarioCreatePayload,
+  type ScenarioRecord,
+} from "@/services/scenarioService";
 
 export const Route = createFileRoute("/scenario")({ component: ScenarioPage });
 
-type ScenarioForm = Omit<ScenarioRecord, "id" | "npv">;
-
-const levelVariant = (npv: number) => (npv <= 0 ? "destructive" : "success");
+type ScenarioForm = ScenarioCreatePayload;
 
 function ScenarioPage() {
   const { scenarios, loading, error, create, update, remove } = useScenarios();
@@ -177,7 +178,7 @@ function ScenarioPage() {
           </span>
         </CardTitle>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-shell">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                 <th className="px-3 py-3 font-medium">Scenario</th>
@@ -185,7 +186,11 @@ function ScenarioPage() {
                 <th className="px-3 py-3 font-medium">Replace</th>
                 <th className="px-3 py-3 font-medium">Maintenance</th>
                 <th className="px-3 py-3 font-medium">Discount</th>
-                <th className="px-3 py-3 font-medium">NPV</th>
+                <th className="px-3 py-3 font-medium">Horizon</th>
+                <th className="px-3 py-3 font-medium">Repair NPV</th>
+                <th className="px-3 py-3 font-medium">Replace NPV</th>
+                <th className="px-3 py-3 font-medium">Lifecycle Cost</th>
+                <th className="px-3 py-3 font-medium">Recommend</th>
                 <th className="px-3 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
@@ -203,7 +208,17 @@ function ScenarioPage() {
                     ${Number(scenario.maintenance_cost).toLocaleString()}
                   </td>
                   <td className="px-3 py-3">{Number(scenario.discount_rate).toFixed(2)}%</td>
-                  <td className="px-3 py-3 font-semibold">${Number(scenario.npv).toFixed(0)}</td>
+                  <td className="px-3 py-3">{scenario.horizon_years} yr</td>
+                  <td className="px-3 py-3">${Number(scenario.repair_npv).toFixed(0)}</td>
+                  <td className="px-3 py-3">${Number(scenario.replacement_npv).toFixed(0)}</td>
+                  <td className="px-3 py-3 font-semibold">
+                    ${Number(scenario.lifecycle_cost).toFixed(0)}
+                  </td>
+                  <td className="px-3 py-3">
+                    <Badge variant={scenario.recommended_option === "Replace" ? "info" : "success"}>
+                      {scenario.recommended_option}
+                    </Badge>
+                  </td>
                   <td className="px-3 py-3 text-right">
                     <div className="flex justify-end gap-1">
                       <button
@@ -290,8 +305,8 @@ function ScenarioModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-deep">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">{initial ? "Edit Scenario" : "New Scenario"}</h2>
           <button

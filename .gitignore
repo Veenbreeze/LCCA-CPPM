@@ -10,6 +10,14 @@ frontend/dist/
 
 # Environment
 .env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
+
+# Claude Code / agent state
+.claude/
 
 # VSCode
 .vscode/

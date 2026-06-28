@@ -4,6 +4,7 @@ export type ProjectRecord = {
   id: number;
   name: string;
   asset: number;
+  scope_description: string;
   budget: number;
   start_date: string;
   end_date: string;

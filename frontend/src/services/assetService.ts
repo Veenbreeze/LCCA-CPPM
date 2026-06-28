@@ -1,5 +1,18 @@
 import { api, getListData } from "@/services/api";
 
+export type LifecycleStage =
+  | "renewal"
+  | "replacement"
+  | "refurbishment"
+  | "expansion";
+
+export const LIFECYCLE_STAGES: LifecycleStage[] = [
+  "renewal",
+  "replacement",
+  "refurbishment",
+  "expansion",
+];
+
 export type AssetRecord = {
   id: number;
   name: string;
@@ -9,6 +22,8 @@ export type AssetRecord = {
   condition_rating: number;
   remaining_useful_life: number;
   status: string;
+  lifecycle_stage: LifecycleStage;
+  criticality: number;
 };
 
 export const AssetService = {
