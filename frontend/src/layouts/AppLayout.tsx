@@ -96,12 +96,12 @@ export function AppLayout() {
           <Link to="/" className="flex items-center gap-3 overflow-hidden">
             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary to-[oklch(0.55_0.22_280)] text-primary-foreground font-bold shadow-elevated">
               <span className="text-[13px] tracking-tight">LC</span>
-              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-sidebar" />
+              {/* <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-sidebar" /> */}
             </div>
             {!collapsed && (
               <div className="leading-tight">
                 <div className="text-[13px] font-semibold tracking-tight">
-                  LCCA · CPPM
+                  LCCA-CPPM
                 </div>
                 <div className="text-[10px] uppercase tracking-[0.15em] text-sidebar-foreground/55">
                   Lifecycle Intelligence
@@ -174,12 +174,12 @@ export function AppLayout() {
                   System Status
                 </span>
                 <span className="inline-flex items-center gap-1 text-success">
-                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                  {/* <span className="h-2.5 w-1.5 rounded-full bg-success" /> */}
                   Operational
                 </span>
               </div>
               <div className="mt-1.5 text-sidebar-foreground/55">
-                v1.0.0 · Build {new Date().getFullYear()}.06
+                v1.0.0 · Build {new Date().getFullYear()}
               </div>
             </div>
           </div>
@@ -208,7 +208,7 @@ export function AppLayout() {
 
           {/* Breadcrumbs */}
           <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground/60">LCCA · CPPM</span>
+            <span className="font-medium text-foreground/60">LCCA-CPPM</span>
             <ChevronRight className="h-3 w-3" />
             {breadcrumbSection && (
               <>
@@ -222,7 +222,7 @@ export function AppLayout() {
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              Live · DEV
+              <span>Active</span>
             </span>
             <button
               onClick={toggle}

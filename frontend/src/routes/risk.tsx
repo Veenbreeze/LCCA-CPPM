@@ -66,8 +66,8 @@ function RiskPage() {
 
   const heatmap = useMemo(
     () =>
-      Array.from({ length: 5 }, (_, pofIdx) =>
-        Array.from({ length: 5 }, (_, cofIdx) => {
+      Array.from({ length: 10 }, (_, pofIdx) =>
+        Array.from({ length: 10 }, (_, cofIdx) => {
           const pof = pofIdx + 1;
           const cof = cofIdx + 1;
           return enrichedRisks.filter(
@@ -109,11 +109,11 @@ function RiskPage() {
     }
     const pof = Number(payload.probability_of_failure);
     const cof = Number(payload.consequence_of_failure);
-    if (!(pof >= 1 && pof <= 5)) {
+    if (!(pof >= 1 && pof <= 10)) {
       setFormError("Probability of Failure must be between 1 and 5.");
       return;
     }
-    if (!(cof >= 1 && cof <= 5)) {
+    if (!(cof >= 1 && cof <= 10)) {
       setFormError("Consequence of Failure must be between 1 and 5.");
       return;
     }
@@ -209,12 +209,12 @@ function RiskPage() {
                   CoF {cof}
                 </div>
               ))}
-              {[5, 4, 3, 2, 1].map((pof) => (
+              {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((pof) => (
                 <div key={`row${pof}`} className="contents">
                   <div className="flex items-center justify-end pr-2 text-xs font-medium text-muted-foreground">
                     PoF {pof}
                   </div>
-                  {[1, 2, 3, 4, 5].map((cof) => {
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((cof) => {
                     const product = pof * cof;
                     const tone =
                       product >= 16
@@ -370,8 +370,8 @@ function RiskModal({
         }
       : {
           asset: availableAssets[0]?.id ?? 0,
-          probability_of_failure: 3,
-          consequence_of_failure: 3,
+          probability_of_failure: 5,
+          consequence_of_failure: 5,
         },
   );
 
@@ -441,7 +441,7 @@ function RiskModal({
             <input
               type="number"
               min={1}
-              max={5}
+              max={10}
               step={0.1}
               value={form.probability_of_failure}
               onChange={(e) =>
@@ -454,7 +454,7 @@ function RiskModal({
             <input
               type="number"
               min={1}
-              max={5}
+              max={10}
               step={0.1}
               value={form.consequence_of_failure}
               onChange={(e) =>
