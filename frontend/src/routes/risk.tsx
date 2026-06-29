@@ -66,14 +66,14 @@ function RiskPage() {
 
   const heatmap = useMemo(
     () =>
-      Array.from({ length: 5 }, (_, pofIdx) =>
-        Array.from({ length: 5 }, (_, cofIdx) => {
+      Array.from({ length: 10 }, (_, pofIdx) =>
+        Array.from({ length: 10 }, (_, cofIdx) => {
           const pof = pofIdx + 1;
           const cof = cofIdx + 1;
           return enrichedRisks.filter(
             (risk) =>
-              Math.min(5, Math.max(1, Math.round(Number(risk.probability_of_failure)))) === pof &&
-              Math.min(5, Math.max(1, Math.round(Number(risk.consequence_of_failure)))) === cof,
+              Math.min(10, Math.max(1, Math.round(Number(risk.probability_of_failure)))) === pof &&
+              Math.min(10, Math.max(1, Math.round(Number(risk.consequence_of_failure)))) === cof,
           ).length;
         }),
       ),
@@ -109,12 +109,12 @@ function RiskPage() {
     }
     const pof = Number(payload.probability_of_failure);
     const cof = Number(payload.consequence_of_failure);
-    if (!(pof >= 1 && pof <= 5)) {
-      setFormError("Probability of Failure must be between 1 and 5.");
+    if (!(pof >= 1 && pof <= 10)) {
+      setFormError("Probability of Failure must be between 1 and 10.");
       return;
     }
-    if (!(cof >= 1 && cof <= 5)) {
-      setFormError("Consequence of Failure must be between 1 and 5.");
+    if (!(cof >= 1 && cof <= 10)) {
+      setFormError("Consequence of Failure must be between 1 and 10.");
       return;
     }
     setSubmitting(true);
@@ -196,47 +196,70 @@ function RiskPage() {
       </div>
 
       <Card className="mt-6">
-        <CardTitle>Risk Heatmap (PoF × CoF)</CardTitle>
+        <CardTitle subtitle="Asset count by Probability × Consequence (1–10 scale)">
+          Risk Heatmap (PoF × CoF)
+        </CardTitle>
         <div className="overflow-x-auto">
           <div className="inline-block">
-            <div className="grid" style={{ gridTemplateColumns: "40px repeat(5, 56px)" }}>
+            <div className="grid" style={{ gridTemplateColumns: "48px repeat(10, 44px)" }}>
               <div />
-              {[1, 2, 3, 4, 5].map((cof) => (
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((cof) => (
                 <div
                   key={`h${cof}`}
-                  className="text-center text-xs font-medium text-muted-foreground py-1"
+                  className="text-center text-[11px] font-medium text-muted-foreground py-1"
                 >
-                  CoF {cof}
+                  C{cof}
                 </div>
               ))}
-              {[5, 4, 3, 2, 1].map((pof) => (
+              {Array.from({ length: 10 }, (_, i) => 10 - i).map((pof) => (
                 <div key={`row${pof}`} className="contents">
-                  <div className="flex items-center justify-end pr-2 text-xs font-medium text-muted-foreground">
-                    PoF {pof}
+                  <div className="flex items-center justify-end pr-2 text-[11px] font-medium text-muted-foreground">
+                    P{pof}
                   </div>
-                  {[1, 2, 3, 4, 5].map((cof) => {
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((cof) => {
                     const product = pof * cof;
                     const tone =
-                      product >= 16
+                      product >= 64
                         ? "bg-destructive/80 text-white"
-                        : product >= 10
-                          ? "bg-warning/70 text-foreground"
-                          : product >= 5
-                            ? "bg-success/60 text-foreground"
-                            : "bg-muted text-muted-foreground";
+                        : product >= 40
+                          ? "bg-destructive/60 text-white"
+                          : product >= 20
+                            ? "bg-warning/70 text-foreground"
+                            : product >= 8
+                              ? "bg-success/60 text-foreground"
+                              : "bg-muted text-muted-foreground";
                     const count = heatmap[pof - 1]?.[cof - 1] ?? 0;
                     return (
                       <div
                         key={`${pof}-${cof}`}
-                        className={`h-10 w-14 flex items-center justify-center text-sm font-semibold rounded-sm m-px ${tone}`}
-                        title={`PoF ${pof} × CoF ${cof} = ${product}, ${count} asset(s)`}
+                        className={`h-9 w-10 flex items-center justify-center text-xs font-semibold rounded-sm m-px transition-transform hover:scale-110 hover:ring-2 hover:ring-ring ${tone}`}
+                        title={`PoF ${pof} × CoF ${cof} = ${product} • ${count} asset(s)`}
                       >
-                        {count}
+                        {count || ""}
                       </div>
                     );
                   })}
                 </div>
               ))}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+              <span className="font-medium">Severity:</span>
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block h-3 w-3 rounded-sm bg-muted" /> Low (&lt;8)
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block h-3 w-3 rounded-sm bg-success/60" /> Moderate (8–19)
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block h-3 w-3 rounded-sm bg-warning/70" /> Elevated (20–39)
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block h-3 w-3 rounded-sm bg-destructive/60" /> High (40–63)
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block h-3 w-3 rounded-sm bg-destructive/80" /> Critical
+                (64+)
+              </span>
             </div>
           </div>
         </div>
@@ -437,11 +460,11 @@ function RiskModal({
             )}
           </Field>
 
-          <Field label="Probability of Failure (1-5)">
+          <Field label="Probability of Failure (1-10)">
             <input
               type="number"
               min={1}
-              max={5}
+              max={10}
               step={0.1}
               value={form.probability_of_failure}
               onChange={(e) =>
@@ -450,11 +473,11 @@ function RiskModal({
               className="input"
             />
           </Field>
-          <Field label="Consequence of Failure (1-5)">
+          <Field label="Consequence of Failure (1-10)">
             <input
               type="number"
               min={1}
-              max={5}
+              max={10}
               step={0.1}
               value={form.consequence_of_failure}
               onChange={(e) =>
