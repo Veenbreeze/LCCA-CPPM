@@ -1,8 +1,7 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 
 const FALLBACK_BASE_URL = "http://127.0.0.1:8000/api";
-export const API_BASE_URL =
-  (import.meta as any).env?.VITE_API_URL?.trim() || FALLBACK_BASE_URL;
+export const API_BASE_URL = (import.meta as any).env?.VITE_API_URL?.trim() || FALLBACK_BASE_URL;
 
 const getAuthToken = () => {
   if (typeof window === "undefined") return null;
@@ -30,7 +29,7 @@ export const api = axios.create({
 });
 
 export function getListData<T>(data: T[] | { results: T[] }): T[] {
-  return Array.isArray(data) ? data : data?.results ?? [];
+  return Array.isArray(data) ? data : (data?.results ?? []);
 }
 
 api.interceptors.request.use((config: AxiosRequestConfig) => {
@@ -46,5 +45,5 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     const message = formatAxiosError(error);
     return Promise.reject(new Error(message));
-  }
+  },
 );

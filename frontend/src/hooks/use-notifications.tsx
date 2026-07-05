@@ -50,7 +50,10 @@ function persistSet(key: string, set: Set<string>) {
   } catch {}
 }
 
-function withAssetName<T extends { asset: number; asset_name?: string }>(items: T[], map: Map<number, string>) {
+function withAssetName<T extends { asset: number; asset_name?: string }>(
+  items: T[],
+  map: Map<number, string>,
+) {
   return items.map((item) => ({
     ...item,
     asset_name: map.get(item.asset) ?? String(item.asset),
@@ -122,11 +125,18 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         title: `New inspection: ${inspection.asset_name}`,
         message: `Condition score ${inspection.condition_score.toFixed(1)} on ${inspection.inspection_date}.`,
         href: "/condition",
-        severity: inspection.condition_score < 2 ? "critical" : inspection.condition_score < 3 ? "high" : "info",
+        severity:
+          inspection.condition_score < 2
+            ? "critical"
+            : inspection.condition_score < 3
+              ? "high"
+              : "info",
         createdAt: inspection.inspection_date,
       }));
 
-    return [...riskNotifs, ...inspectionNotifs].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return [...riskNotifs, ...inspectionNotifs].sort((a, b) =>
+      b.createdAt.localeCompare(a.createdAt),
+    );
   }, [risks, inspections, reviewedInspections]);
 
   const unreadCount = notifications.filter((notification) => !read.has(notification.id)).length;
@@ -163,15 +173,18 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     });
   }, []);
 
-  const addInspection = useCallback(async (record: Omit<ConditionRecord, "id" | "asset_name">) => {
-    const created = await ConditionService.create(record);
-    const assetMap = new Map(assets.map((asset) => [asset.id, asset.name]));
-    setInspections((prev) => [
-      { ...created, asset_name: assetMap.get(created.asset) ?? String(created.asset) },
-      ...prev,
-    ]);
-    return created;
-  }, [assets]);
+  const addInspection = useCallback(
+    async (record: Omit<ConditionRecord, "id" | "asset_name">) => {
+      const created = await ConditionService.create(record);
+      const assetMap = new Map(assets.map((asset) => [asset.id, asset.name]));
+      setInspections((prev) => [
+        { ...created, asset_name: assetMap.get(created.asset) ?? String(created.asset) },
+        ...prev,
+      ]);
+      return created;
+    },
+    [assets],
+  );
 
   const value: NotificationsContextValue = {
     notifications,

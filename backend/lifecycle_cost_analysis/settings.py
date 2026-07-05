@@ -170,11 +170,32 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-CORS_ALLOWED_ORIGINS = [
+# CORS — local dev origins are always allowed; production origins are read from env.
+# Set CORS_ALLOWED_ORIGINS in the backend's environment as a comma-separated list, e.g.
+#   CORS_ALLOWED_ORIGINS=https://lcca-cppm.vercel.app,https://lcca-cppm-pj.vercel.app
+# To allow every Vercel preview deployment as well, set CORS_ALLOWED_ORIGIN_REGEXES.
+_DEV_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:8080",
+    "http://127.0.0.1:5173",
     "http://127.0.0.1:8080",
 ]
+_ENV_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_DEV_ORIGINS + _ENV_ORIGINS))
+
+# Optional: allow Vercel preview URLs via regex.
+# Default permits any *.vercel.app subdomain when DEBUG is on; tighten in production.
+_DEFAULT_REGEXES = [r"^https://.*\.vercel\.app$"] if DEBUG else []
+_ENV_REGEXES = [
+    pattern.strip()
+    for pattern in os.getenv("CORS_ALLOWED_ORIGIN_REGEXES", "").split(",")
+    if pattern.strip()
+]
+CORS_ALLOWED_ORIGIN_REGEXES = _DEFAULT_REGEXES + _ENV_REGEXES
 
 CORS_ALLOW_CREDENTIALS = True
 

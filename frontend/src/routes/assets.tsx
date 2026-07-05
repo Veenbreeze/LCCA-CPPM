@@ -4,7 +4,11 @@ import { Plus, Search, Edit2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Card, Badge, Alert } from "@/components/ui-kit";
 import { useAssets } from "@/hooks/useAssets";
-import { type AssetRecord } from "@/services/assetService";
+import {
+  LIFECYCLE_STAGES,
+  type AssetRecord,
+  type LifecycleStage,
+} from "@/services/assetService";
 
 export const Route = createFileRoute("/assets")({ component: AssetsPage });
 
@@ -31,9 +35,9 @@ function AssetsPage() {
           (filterType === "All" || asset.asset_type === filterType) &&
           (asset.name.toLowerCase().includes(query.toLowerCase()) ||
             String(asset.id).toLowerCase().includes(query.toLowerCase()) ||
-            asset.location.toLowerCase().includes(query.toLowerCase()))
+            asset.location.toLowerCase().includes(query.toLowerCase())),
       ),
-    [assets, filterType, query]
+    [assets, filterType, query],
   );
 
   const onDelete = async (id: number) => {
@@ -114,7 +118,7 @@ function AssetsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-shell">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                 <th className="px-3 py-3 font-medium">Asset ID</th>
@@ -123,6 +127,8 @@ function AssetsPage() {
                 <th className="px-3 py-3 font-medium">Location</th>
                 <th className="px-3 py-3 font-medium">Condition</th>
                 <th className="px-3 py-3 font-medium">RUL</th>
+                <th className="px-3 py-3 font-medium">Lifecycle Stage</th>
+                <th className="px-3 py-3 font-medium">Criticality</th>
                 <th className="px-3 py-3 font-medium">Status</th>
                 <th className="px-3 py-3 font-medium text-right">Actions</th>
               </tr>
@@ -144,8 +150,8 @@ function AssetsPage() {
                               ? asset.condition_rating <= 2
                                 ? "bg-destructive"
                                 : asset.condition_rating < 4
-                                ? "bg-warning"
-                                : "bg-success"
+                                  ? "bg-warning"
+                                  : "bg-success"
                               : "bg-muted"
                           }`}
                         />
@@ -153,6 +159,12 @@ function AssetsPage() {
                     </div>
                   </td>
                   <td className="px-3 py-3 font-medium">{asset.remaining_useful_life}</td>
+                  <td className="px-3 py-3 capitalize text-muted-foreground">
+                    {asset.lifecycle_stage}
+                  </td>
+                  <td className="px-3 py-3 font-medium">
+                    {Number(asset.criticality).toFixed(1)}
+                  </td>
                   <td className="px-3 py-3">
                     <Badge variant={statusVariant(asset.status) as any}>{asset.status}</Badge>
                   </td>
@@ -181,7 +193,7 @@ function AssetsPage() {
               ))}
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-3 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={10} className="px-3 py-8 text-center text-sm text-muted-foreground">
                     No assets match your filters.
                   </td>
                 </tr>
@@ -231,6 +243,8 @@ function AssetModal({
           condition_rating: Number(initial.condition_rating),
           remaining_useful_life: initial.remaining_useful_life,
           status: initial.status,
+          lifecycle_stage: initial.lifecycle_stage,
+          criticality: Number(initial.criticality),
         }
       : {
           name: "",
@@ -240,15 +254,21 @@ function AssetModal({
           condition_rating: 3,
           remaining_useful_life: 8,
           status: "Operational",
-        }
+          lifecycle_stage: "renewal",
+          criticality: 3,
+        },
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-deep">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">{initial ? "Edit Asset" : "Add Asset"}</h2>
-          <button aria-label="Close asset form" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted">
+          <button
+            aria-label="Close asset form"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -330,6 +350,35 @@ function AssetModal({
               <option>Decommissioned</option>
             </select>
           </Field>
+          <Field label="Lifecycle Stage">
+            <select
+              aria-label="Lifecycle stage"
+              value={form.lifecycle_stage}
+              onChange={(e) =>
+                setForm({ ...form, lifecycle_stage: e.target.value as LifecycleStage })
+              }
+              className="input"
+            >
+              {LIFECYCLE_STAGES.map((stage) => (
+                <option key={stage} value={stage} className="capitalize">
+                  {stage.charAt(0).toUpperCase() + stage.slice(1)}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Criticality (1-5)">
+            <input
+              aria-label="Criticality"
+              placeholder="3.0"
+              type="number"
+              min={1}
+              max={5}
+              step={0.1}
+              value={form.criticality}
+              onChange={(e) => setForm({ ...form, criticality: Number(e.target.value) })}
+              className="input"
+            />
+          </Field>
           <Field label="Installation Date" className="col-span-2">
             <input
               type="date"
@@ -339,7 +388,11 @@ function AssetModal({
             />
           </Field>
           <div className="col-span-2 mt-2 flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+            >
               Cancel
             </button>
             <button
@@ -357,7 +410,15 @@ function AssetModal({
   );
 }
 
-function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+function Field({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <label className={`flex flex-col gap-1 ${className}`}>
       <span className="text-xs font-medium text-muted-foreground">{label}</span>

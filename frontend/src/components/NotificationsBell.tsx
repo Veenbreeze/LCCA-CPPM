@@ -87,7 +87,7 @@ export function NotificationsBell() {
                         <span
                           className={cn(
                             "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
-                            severityClasses(n.severity)
+                            severityClasses(n.severity),
                           )}
                         >
                           <Icon className="h-4 w-4" />
@@ -95,7 +95,9 @@ export function NotificationsBell() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
                             <div className="text-sm font-medium leading-snug">{n.title}</div>
-                            {!isRead && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                            {!isRead && (
+                              <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                            )}
                           </div>
                           <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                             {n.message}

@@ -3,7 +3,8 @@ from assets.models import Asset
 
 class Project(models.Model):
     name = models.CharField(max_length=255)
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name="projects")
+    scope_description = models.TextField(blank=True, default="")
     budget = models.DecimalField(max_digits=15, decimal_places=2)
     start_date = models.DateField()
     end_date = models.DateField()

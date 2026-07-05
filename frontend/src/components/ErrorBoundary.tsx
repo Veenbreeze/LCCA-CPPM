@@ -32,7 +32,9 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
               Something went wrong while loading the dashboard. Refresh or return to the home page.
             </p>
             {this.state.error?.message ? (
-              <pre className="mt-4 rounded-lg bg-muted p-4 text-xs text-destructive">{this.state.error.message}</pre>
+              <pre className="mt-4 rounded-lg bg-muted p-4 text-xs text-destructive">
+                {this.state.error.message}
+              </pre>
             ) : null}
             <div className="mt-6 flex flex-wrap gap-3">
               <button

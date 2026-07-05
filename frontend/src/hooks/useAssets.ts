@@ -30,16 +30,19 @@ export function useAssets() {
     }
   }, []);
 
-  const update = useCallback(async (id: number | string, payload: Partial<Omit<AssetRecord, "id">>) => {
-    setLoading(true);
-    try {
-      const updated = await AssetService.update(id, payload);
-      setAssets((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-      return updated;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const update = useCallback(
+    async (id: number | string, payload: Partial<Omit<AssetRecord, "id">>) => {
+      setLoading(true);
+      try {
+        const updated = await AssetService.update(id, payload);
+        setAssets((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+        return updated;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   const remove = useCallback(async (id: number | string) => {
     setLoading(true);

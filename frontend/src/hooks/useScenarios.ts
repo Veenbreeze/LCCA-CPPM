@@ -30,16 +30,19 @@ export function useScenarios() {
     }
   }, []);
 
-  const update = useCallback(async (id: number | string, payload: Partial<Omit<ScenarioRecord, "id" | "npv">>) => {
-    setLoading(true);
-    try {
-      const updated = await ScenarioService.update(id, payload);
-      setScenarios((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-      return updated;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const update = useCallback(
+    async (id: number | string, payload: Partial<Omit<ScenarioRecord, "id" | "npv">>) => {
+      setLoading(true);
+      try {
+        const updated = await ScenarioService.update(id, payload);
+        setScenarios((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+        return updated;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   const remove = useCallback(async (id: number | string) => {
     setLoading(true);

@@ -166,6 +166,7 @@ For detailed API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.m
 - **[Frontend Setup & Architecture](./FRONTEND_SETUP.md)** - Frontend development guide, components, and services
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference with request/response examples
 - **[Development Guide](./DEVELOPMENT.md)** - Development workflow and best practices
+- **[Deployment Guide](./DEPLOYMENT.md)** - Vercel (frontend) + Render/Railway (backend) deployment walkthrough
 
 ---
 

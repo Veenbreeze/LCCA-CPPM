@@ -1,18 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 import { Plus, Calculator, TrendingDown, TrendingUp, X, Edit2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Card, CardTitle, StatCard, Badge, Alert } from "@/components/ui-kit";
 import { useScenarios } from "@/hooks/useScenarios";
 import { useAssets } from "@/hooks/useAssets";
-import { type ScenarioRecord } from "@/services/scenarioService";
+import {
+  type ScenarioCreatePayload,
+  type ScenarioRecord,
+} from "@/services/scenarioService";
 
 export const Route = createFileRoute("/scenario")({ component: ScenarioPage });
 
-type ScenarioForm = Omit<ScenarioRecord, "id" | "npv">;
-
-const levelVariant = (npv: number) => (npv <= 0 ? "destructive" : "success");
+type ScenarioForm = ScenarioCreatePayload;
 
 function ScenarioPage() {
   const { scenarios, loading, error, create, update, remove } = useScenarios();
@@ -26,16 +36,21 @@ function ScenarioPage() {
 
   const bestScenario = useMemo(() => {
     if (!scenarios.length) return null;
-    return scenarios.reduce((best, current) => (current.npv < best.npv ? current : best), scenarios[0]);
+    return scenarios.reduce(
+      (best, current) => (current.npv < best.npv ? current : best),
+      scenarios[0],
+    );
   }, [scenarios]);
 
   const summary = useMemo(
     () => ({
       total: scenarios.length,
-      average: scenarios.length ? scenarios.reduce((sum, item) => sum + item.npv, 0) / scenarios.length : 0,
+      average: scenarios.length
+        ? scenarios.reduce((sum, item) => sum + item.npv, 0) / scenarios.length
+        : 0,
       best: bestScenario?.npv ?? 0,
     }),
-    [bestScenario, scenarios]
+    [bestScenario, scenarios],
   );
 
   const chartData = useMemo(
@@ -45,7 +60,7 @@ function ScenarioPage() {
         NPV: Number(scenario.npv),
         index,
       })),
-    [assetMap, scenarios]
+    [assetMap, scenarios],
   );
 
   const onSubmit = async (payload: ScenarioForm) => {
@@ -74,7 +89,10 @@ function ScenarioPage() {
 
   return (
     <div>
-      <PageHeader title="Scenario Analysis" subtitle="Lifecycle cost comparison and scenario management" />
+      <PageHeader
+        title="Scenario Analysis"
+        subtitle="Lifecycle cost comparison and scenario management"
+      />
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}
 
@@ -91,8 +109,12 @@ function ScenarioPage() {
         </Card>
         <Card>
           <CardTitle>Best Scenario</CardTitle>
-          <div className="mt-4 text-3xl font-semibold">${bestScenario ? bestScenario.npv.toFixed(0) : "—"}</div>
-          <div className="mt-2 text-xs text-muted-foreground">{bestScenario ? assetMap.get(bestScenario.asset) : "No scenario selected"}</div>
+          <div className="mt-4 text-3xl font-semibold">
+            ${bestScenario ? bestScenario.npv.toFixed(0) : "—"}
+          </div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            {bestScenario ? assetMap.get(bestScenario.asset) : "No scenario selected"}
+          </div>
         </Card>
       </div>
 
@@ -100,7 +122,10 @@ function ScenarioPage() {
         <Card>
           <CardTitle>Scenario Inputs</CardTitle>
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Create scenario records for repair, replacement, and maintenance cost comparisons. Use this panel to manage relative lifecycle decisions.</p>
+            <p className="text-sm text-muted-foreground">
+              Create scenario records for repair, replacement, and maintenance cost comparisons. Use
+              this panel to manage relative lifecycle decisions.
+            </p>
             <button
               onClick={() => {
                 setEditing(null);
@@ -119,9 +144,24 @@ function ScenarioPage() {
             <ResponsiveContainer>
               <BarChart data={chartData} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
                 <CartesianGrid stroke="oklch(0.92 0.01 250)" vertical={false} />
-                <XAxis dataKey="scenario" tick={{ fontSize: 11, fill: "oklch(0.52 0.03 250)" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "oklch(0.52 0.03 250)" }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid oklch(0.92 0.01 250)", fontSize: 12 }} />
+                <XAxis
+                  dataKey="scenario"
+                  tick={{ fontSize: 11, fill: "oklch(0.52 0.03 250)" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "oklch(0.52 0.03 250)" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 8,
+                    border: "1px solid oklch(0.92 0.01 250)",
+                    fontSize: 12,
+                  }}
+                />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="NPV" fill="oklch(0.52 0.20 254)" radius={[6, 6, 0, 0]} />
               </BarChart>
@@ -133,10 +173,12 @@ function ScenarioPage() {
       <Card className="mt-6">
         <CardTitle>
           Scenarios
-          <span className="ml-2 text-xs text-muted-foreground">{loading ? "Loading…" : `${scenarios.length} records`}</span>
+          <span className="ml-2 text-xs text-muted-foreground">
+            {loading ? "Loading…" : `${scenarios.length} records`}
+          </span>
         </CardTitle>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-shell">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                 <th className="px-3 py-3 font-medium">Scenario</th>
@@ -144,7 +186,11 @@ function ScenarioPage() {
                 <th className="px-3 py-3 font-medium">Replace</th>
                 <th className="px-3 py-3 font-medium">Maintenance</th>
                 <th className="px-3 py-3 font-medium">Discount</th>
-                <th className="px-3 py-3 font-medium">NPV</th>
+                <th className="px-3 py-3 font-medium">Horizon</th>
+                <th className="px-3 py-3 font-medium">Repair NPV</th>
+                <th className="px-3 py-3 font-medium">Replace NPV</th>
+                <th className="px-3 py-3 font-medium">Lifecycle Cost</th>
+                <th className="px-3 py-3 font-medium">Recommend</th>
                 <th className="px-3 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
@@ -152,11 +198,11 @@ function ScenarioPage() {
               {scenarios.map((scenario) => (
                 <tr key={scenario.id} className="border-b border-border hover:bg-muted/40">
                   <td className="px-3 py-3 font-medium">{assetMap.get(scenario.asset) ?? `Asset ${scenario.asset}`}</td>
-                  <td className="px-3 py-3">TSH{Number(scenario.repair_cost).toLocaleString()}</td>
-                  <td className="px-3 py-3">TSH{Number(scenario.replacement_cost).toLocaleString()}</td>
-                  <td className="px-3 py-3">TSH{Number(scenario.maintenance_cost).toLocaleString()}</td>
+                  <td className="px-3 py-3">${Number(scenario.repair_cost).toLocaleString()}</td>
+                  <td className="px-3 py-3">${Number(scenario.replacement_cost).toLocaleString()}</td>
+                  <td className="px-3 py-3">${Number(scenario.maintenance_cost).toLocaleString()}</td>
                   <td className="px-3 py-3">{Number(scenario.discount_rate).toFixed(2)}%</td>
-                  <td className="px-3 py-3 font-semibold">TSH{Number(scenario.npv).toFixed(0)}</td>
+                  <td className="px-3 py-3 font-semibold">${Number(scenario.npv).toFixed(0)}</td>
                   <td className="px-3 py-3 text-right">
                     <div className="flex justify-end gap-1">
                       <button
@@ -239,15 +285,18 @@ function ScenarioModal({
           replacement_cost: 0,
           maintenance_cost: 0,
           discount_rate: 5,
-        }
+        },
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-deep">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">{initial ? "Edit Scenario" : "New Scenario"}</h2>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted">
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -307,10 +356,18 @@ function ScenarioModal({
             />
           </Label>
           <div className="col-span-2 mt-2 flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={submitting} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+            >
               {submitting ? "Saving…" : "Save"}
             </button>
           </div>
@@ -320,7 +377,15 @@ function ScenarioModal({
   );
 }
 
-function Label({ field, children, full }: { field: string; children: React.ReactNode; full?: boolean }) {
+function Label({
+  field,
+  children,
+  full,
+}: {
+  field: string;
+  children: React.ReactNode;
+  full?: boolean;
+}) {
   return (
     <label className={`flex flex-col gap-1 ${full ? "col-span-2" : ""}`}>
       <span className="text-xs font-medium text-muted-foreground">{field}</span>

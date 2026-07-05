@@ -10,6 +10,11 @@ class AssetViewSet(viewsets.ModelViewSet):
     serializer_class = AssetSerializer
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['asset_type', 'location', 'status']
-    search_fields = ['name', 'asset_type', 'location', 'status']
-    ordering_fields = ['installation_date', 'remaining_useful_life', 'condition_rating']
+    filterset_fields = ['asset_type', 'location', 'status', 'lifecycle_stage']
+    search_fields = ['name', 'asset_type', 'location', 'status', 'lifecycle_stage']
+    ordering_fields = [
+        'installation_date',
+        'remaining_useful_life',
+        'condition_rating',
+        'criticality',
+    ]

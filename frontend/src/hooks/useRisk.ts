@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { RiskService, type RiskRecord } from "@/services/riskService";
+import {
+  RiskService,
+  type RiskCreatePayload,
+  type RiskRecord,
+} from "@/services/riskService";
 
 export function useRisk() {
   const [risks, setRisks] = useState<RiskRecord[]>([]);
@@ -19,25 +23,24 @@ export function useRisk() {
     }
   }, []);
 
-  const update = useCallback(async (id: number | string, payload: Partial<Omit<RiskRecord, "id">>) => {
-    setLoading(true);
-    try {
+  const create = useCallback(async (payload: RiskCreatePayload) => {
+    const created = await RiskService.create(payload);
+    setRisks((prev) => [...prev, created]);
+    return created;
+  }, []);
+
+  const update = useCallback(
+    async (id: number | string, payload: Partial<RiskCreatePayload>) => {
       const updated = await RiskService.update(id, payload);
       setRisks((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
       return updated;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const remove = useCallback(async (id: number | string) => {
-    setLoading(true);
-    try {
-      await RiskService.remove(id);
-      setRisks((prev) => prev.filter((item) => item.id !== id));
-    } finally {
-      setLoading(false);
-    }
+    await RiskService.remove(id);
+    setRisks((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
   useEffect(() => {
@@ -49,6 +52,7 @@ export function useRisk() {
     loading,
     error,
     refresh,
+    create,
     update,
     remove,
   };

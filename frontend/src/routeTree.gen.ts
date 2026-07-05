@@ -13,6 +13,7 @@ import { Route as ScenarioRouteImport } from './routes/scenario'
 import { Route as RiskRouteImport } from './routes/risk'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as PrioritisationRouteImport } from './routes/prioritisation'
 import { Route as ConditionRouteImport } from './routes/condition'
 import { Route as AssetsRouteImport } from './routes/assets'
 import { Route as IndexRouteImport } from './routes/index'
@@ -37,6 +38,11 @@ const ProjectsRoute = ProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrioritisationRoute = PrioritisationRouteImport.update({
+  id: '/prioritisation',
+  path: '/prioritisation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConditionRoute = ConditionRouteImport.update({
   id: '/condition',
   path: '/condition',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assets': typeof AssetsRoute
   '/condition': typeof ConditionRoute
+  '/prioritisation': typeof PrioritisationRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/risk': typeof RiskRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assets': typeof AssetsRoute
   '/condition': typeof ConditionRoute
+  '/prioritisation': typeof PrioritisationRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/risk': typeof RiskRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assets': typeof AssetsRoute
   '/condition': typeof ConditionRoute
+  '/prioritisation': typeof PrioritisationRoute
   '/projects': typeof ProjectsRoute
   '/reports': typeof ReportsRoute
   '/risk': typeof RiskRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assets'
     | '/condition'
+    | '/prioritisation'
     | '/projects'
     | '/reports'
     | '/risk'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assets'
     | '/condition'
+    | '/prioritisation'
     | '/projects'
     | '/reports'
     | '/risk'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assets'
     | '/condition'
+    | '/prioritisation'
     | '/projects'
     | '/reports'
     | '/risk'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssetsRoute: typeof AssetsRoute
   ConditionRoute: typeof ConditionRoute
+  PrioritisationRoute: typeof PrioritisationRoute
   ProjectsRoute: typeof ProjectsRoute
   ReportsRoute: typeof ReportsRoute
   RiskRoute: typeof RiskRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/prioritisation': {
+      id: '/prioritisation'
+      path: '/prioritisation'
+      fullPath: '/prioritisation'
+      preLoaderRoute: typeof PrioritisationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/condition': {
       id: '/condition'
       path: '/condition'
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssetsRoute: AssetsRoute,
   ConditionRoute: ConditionRoute,
+  PrioritisationRoute: PrioritisationRoute,
   ProjectsRoute: ProjectsRoute,
   ReportsRoute: ReportsRoute,
   RiskRoute: RiskRoute,
