@@ -152,11 +152,11 @@ function ScenarioPage() {
               {scenarios.map((scenario) => (
                 <tr key={scenario.id} className="border-b border-border hover:bg-muted/40">
                   <td className="px-3 py-3 font-medium">{assetMap.get(scenario.asset) ?? `Asset ${scenario.asset}`}</td>
-                  <td className="px-3 py-3">${Number(scenario.repair_cost).toLocaleString()}</td>
-                  <td className="px-3 py-3">${Number(scenario.replacement_cost).toLocaleString()}</td>
-                  <td className="px-3 py-3">${Number(scenario.maintenance_cost).toLocaleString()}</td>
+                  <td className="px-3 py-3">TSH{Number(scenario.repair_cost).toLocaleString()}</td>
+                  <td className="px-3 py-3">TSH{Number(scenario.replacement_cost).toLocaleString()}</td>
+                  <td className="px-3 py-3">TSH{Number(scenario.maintenance_cost).toLocaleString()}</td>
                   <td className="px-3 py-3">{Number(scenario.discount_rate).toFixed(2)}%</td>
-                  <td className="px-3 py-3 font-semibold">${Number(scenario.npv).toFixed(0)}</td>
+                  <td className="px-3 py-3 font-semibold">TSH{Number(scenario.npv).toFixed(0)}</td>
                   <td className="px-3 py-3 text-right">
                     <div className="flex justify-end gap-1">
                       <button

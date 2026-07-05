@@ -23,7 +23,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "LCA·CPPM — Lifecycle Cost & Capital Project Portfolio" },
+      { title: "LCCA-CPPM" },
       { name: "description", content: "Enterprise-grade Lifecycle Cost Analysis and Capital Project Portfolio Management dashboard." },
     ],
     links: [

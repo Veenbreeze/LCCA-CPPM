@@ -110,7 +110,7 @@ function Dashboard() {
           value={loading ? "…" : totalAssets.toString()}
           hint="Across the portfolio"
           icon={Boxes}
-          trend={{ value: "+5 this quarter", positive: true }}
+          trend={{ value: "all assets in portfolio", positive: true }}
         />
         <StatCard
           label="High-Risk Assets"
@@ -118,7 +118,7 @@ function Dashboard() {
           hint="Critical + High"
           icon={ShieldAlert}
           accent="destructive"
-          trend={{ value: "+2 since last report", positive: false }}
+          trend={{ value: "all high-risk assets", positive: false }}
         />
         <StatCard
           label="Active Projects"
@@ -129,7 +129,7 @@ function Dashboard() {
         />
         <StatCard
           label="Total CAPEX Budget"
-          value={loading ? "…" : `$${(totalCapex / 1_000_000).toFixed(2)}M`}
+          value={loading ? "…" : `${(totalCapex)}TSH`}
           hint={`${projects.length} projects`}
           icon={Wallet}
           accent="primary"
