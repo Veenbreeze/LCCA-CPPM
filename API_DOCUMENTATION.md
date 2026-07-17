@@ -39,7 +39,16 @@ All responses are in JSON format.
 
 **Current Status:** ✅ No authentication required (AllowAny permissions)
 
-All endpoints are publicly accessible. No API key or token required.
+All resource endpoints (`assets`, `conditions`, `risks`, `projects`, `scenarios`, `reports`) are
+publicly accessible — no API key or token required, and no `Authorization` header is checked.
+
+JWT token endpoints exist (via `rest_framework_simplejwt`) but are **not currently enforced** by
+any view:
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| POST | `/api/token/` | `{"username", "password"}` | `{"access", "refresh"}` |
+| POST | `/api/token/refresh/` | `{"refresh"}` | `{"access"}` |
 
 ---
 
@@ -169,7 +178,9 @@ GET /api/assets/
       "installation_date": "2015-01-15",
       "condition_rating": "3.5",
       "remaining_useful_life": 5,
-      "status": "Operational"
+      "status": "Operational",
+      "lifecycle_stage": "renewal",
+      "criticality": "3.0"
     },
     {
       "id": 2,
@@ -179,11 +190,28 @@ GET /api/assets/
       "installation_date": "2010-06-20",
       "condition_rating": "2.5",
       "remaining_useful_life": 3,
-      "status": "Maintenance"
+      "status": "Maintenance",
+      "lifecycle_stage": "replacement",
+      "criticality": "4.0"
     }
   ]
 }
 ```
+
+**Fields:**
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | int | read-only |
+| `name` | string | |
+| `asset_type` | string | |
+| `location` | string | |
+| `installation_date` | date | |
+| `condition_rating` | decimal (1 dp) | 1.0–5.0 by convention, not server-enforced |
+| `remaining_useful_life` | int | years |
+| `status` | string | free text, e.g. `Operational`, `Maintenance` |
+| `lifecycle_stage` | string | one of `renewal`, `replacement`, `refurbishment`, `expansion` (default `renewal`) |
+| `criticality` | decimal (1 dp) | 1.0–5.0 by convention, default `1.0`; read by the Risk endpoints |
 
 ### Get Single Asset
 
@@ -207,7 +235,9 @@ curl http://localhost:8000/api/assets/1/
   "installation_date": "2015-01-15",
   "condition_rating": "3.5",
   "remaining_useful_life": 5,
-  "status": "Operational"
+  "status": "Operational",
+  "lifecycle_stage": "renewal",
+  "criticality": "3.0"
 }
 ```
 
@@ -228,7 +258,9 @@ Content-Type: application/json
   "installation_date": "2018-03-10",
   "condition_rating": 4.0,
   "remaining_useful_life": 7,
-  "status": "Operational"
+  "status": "Operational",
+  "lifecycle_stage": "renewal",
+  "criticality": 2.0
 }
 ```
 
@@ -242,7 +274,9 @@ Content-Type: application/json
   "installation_date": "2018-03-10",
   "condition_rating": "4.0",
   "remaining_useful_life": 7,
-  "status": "Operational"
+  "status": "Operational",
+  "lifecycle_stage": "renewal",
+  "criticality": "2.0"
 }
 ```
 
@@ -272,7 +306,9 @@ Content-Type: application/json
   "installation_date": "2015-01-15",
   "condition_rating": "3.5",
   "remaining_useful_life": 5,
-  "status": "Maintenance"
+  "status": "Maintenance",
+  "lifecycle_stage": "renewal",
+  "criticality": "3.0"
 }
 ```
 
@@ -292,7 +328,8 @@ DELETE /api/assets/{id}/
 
 ## Conditions API
 
-Track asset condition assessments over time.
+Track asset condition inspections over time. There is no `inspector` field — the model only
+tracks the asset, inspection date, score, and free-text notes.
 
 ### List Conditions
 
@@ -309,10 +346,9 @@ GET /api/conditions/
     {
       "id": 1,
       "asset": 1,
-      "assessment_date": "2025-04-22",
-      "rating": "3.5",
-      "notes": "Normal wear and tear observed",
-      "inspector": "John Smith"
+      "inspection_date": "2025-04-22",
+      "condition_score": "3.5",
+      "notes": "Normal wear and tear observed"
     }
   ]
 }
@@ -337,10 +373,9 @@ Content-Type: application/json
 ```json
 {
   "asset": 1,
-  "assessment_date": "2025-04-22",
-  "rating": 3.5,
-  "notes": "Normal wear and tear observed",
-  "inspector": "John Smith"
+  "inspection_date": "2025-04-22",
+  "condition_score": 3.5,
+  "notes": "Normal wear and tear observed"
 }
 ```
 
@@ -349,10 +384,9 @@ Content-Type: application/json
 {
   "id": 1,
   "asset": 1,
-  "assessment_date": "2025-04-22",
-  "rating": "3.5",
-  "notes": "Normal wear and tear observed",
-  "inspector": "John Smith"
+  "inspection_date": "2025-04-22",
+  "condition_score": "3.5",
+  "notes": "Normal wear and tear observed"
 }
 ```
 
@@ -367,7 +401,7 @@ Content-Type: application/json
 **Body:**
 ```json
 {
-  "rating": 3.0,
+  "condition_score": 3.0,
   "notes": "Updated assessment"
 }
 ```
@@ -383,7 +417,8 @@ DELETE /api/conditions/{id}/
 
 ## Risks API
 
-Manage risk assessments using Probability × Consequence matrix.
+Manage risk assessments using a Probability × Consequence matrix. Each asset has **at most one**
+risk record — `asset` is a one-to-one relationship, not a foreign key.
 
 ### List Risks
 
@@ -402,7 +437,9 @@ GET /api/risks/
       "asset": 1,
       "probability_of_failure": "2.5",
       "consequence_of_failure": "4.0",
-      "computed_risk_score": "10.0"
+      "computed_risk_score": 10.0,
+      "criticality": "3.0",
+      "combined_score": 30.0
     }
   ]
 }
@@ -439,14 +476,19 @@ Content-Type: application/json
   "asset": 1,
   "probability_of_failure": "2.5",
   "consequence_of_failure": "4.0",
-  "computed_risk_score": "10.0"
+  "computed_risk_score": 10.0,
+  "criticality": "3.0",
+  "combined_score": 30.0
 }
 ```
 
 **Notes:**
-- `probability_of_failure`: 1-5 scale
-- `consequence_of_failure`: 1-5 scale
-- `computed_risk_score`: Calculated as PoF × CoF
+- `probability_of_failure` / `consequence_of_failure`: decimal, no server-side range enforcement
+  (used as 1-5 / 1-10 scales by convention only)
+- `computed_risk_score` (read-only): `probability_of_failure × consequence_of_failure`
+- `criticality` (read-only): copied from the related asset's `criticality`
+- `combined_score` (read-only): `computed_risk_score × criticality` — used for intervention
+  prioritisation. Band thresholds: Critical ≥100, High ≥50, Medium ≥20, else Low.
 
 ### Update Risk
 
@@ -475,7 +517,8 @@ DELETE /api/risks/{id}/
 
 ## Projects API
 
-Manage capital projects and track budget/status.
+Manage capital projects and track budget/status. There is **no `spent` field** — only a single
+`budget` amount is tracked. `end_date` is required (not nullable).
 
 ### List Projects
 
@@ -492,12 +535,13 @@ GET /api/projects/
     {
       "id": 1,
       "name": "Boiler Replacement Project",
-      "status": "Active",
+      "asset": 1,
+      "scope_description": "Full replacement of primary boiler unit.",
       "budget": "50000.00",
-      "spent": "35000.00",
       "start_date": "2025-01-15",
-      "end_date": null,
-      "asset": 1
+      "end_date": "2025-09-30",
+      "status": "Active",
+      "responsible_person": "Jane Doe"
     }
   ]
 }
@@ -522,12 +566,13 @@ Content-Type: application/json
 ```json
 {
   "name": "HVAC System Replacement",
-  "status": "Planning",
+  "asset": 3,
+  "scope_description": "Replace rooftop HVAC unit and controls.",
   "budget": 75000,
-  "spent": 0,
   "start_date": "2025-06-01",
-  "end_date": null,
-  "asset": 3
+  "end_date": "2025-12-15",
+  "status": "Planning",
+  "responsible_person": "Jane Doe"
 }
 ```
 
@@ -536,12 +581,13 @@ Content-Type: application/json
 {
   "id": 2,
   "name": "HVAC System Replacement",
-  "status": "Planning",
+  "asset": 3,
+  "scope_description": "Replace rooftop HVAC unit and controls.",
   "budget": "75000.00",
-  "spent": "0.00",
   "start_date": "2025-06-01",
-  "end_date": null,
-  "asset": 3
+  "end_date": "2025-12-15",
+  "status": "Planning",
+  "responsible_person": "Jane Doe"
 }
 ```
 
@@ -557,7 +603,6 @@ Content-Type: application/json
 ```json
 {
   "status": "Completed",
-  "spent": 75000.00,
   "end_date": "2025-11-30"
 }
 ```
@@ -573,7 +618,10 @@ DELETE /api/projects/{id}/
 
 ## Scenarios API
 
-Analyze lifecycle cost scenarios (repair vs replacement vs maintenance).
+Analyze lifecycle cost scenarios (repair vs replacement, discounted over the asset's remaining
+useful life). There is **no `computed_npv` field** — the real computed fields are `npv`,
+`repair_npv`, `replacement_npv`, `lifecycle_cost`, `recommended_option`, and `horizon_years`, all
+read-only and derived from the asset every time the record is serialized.
 
 ### List Scenarios
 
@@ -594,7 +642,12 @@ GET /api/scenarios/
       "replacement_cost": "25000.00",
       "maintenance_cost": "1000.00",
       "discount_rate": "5.00",
-      "computed_npv": "23000.00"
+      "npv": 9329.48,
+      "repair_npv": 9329.48,
+      "replacement_npv": 27164.74,
+      "lifecycle_cost": 9329.48,
+      "recommended_option": "Repair",
+      "horizon_years": 5
     }
   ]
 }
@@ -635,14 +688,25 @@ Content-Type: application/json
   "replacement_cost": "25000.00",
   "maintenance_cost": "1000.00",
   "discount_rate": "5.00",
-  "computed_npv": "23000.00"
+  "npv": 21598.36,
+  "repair_npv": 26598.36,
+  "replacement_npv": 27299.18,
+  "lifecycle_cost": 26598.36,
+  "recommended_option": "Repair",
+  "horizon_years": 5
 }
 ```
 
 **Notes:**
-- NPV calculation: `(repair_cost + maintenance_cost) - replacement_cost`
-- Adjusted by discount rate
-- Lower NPV indicates better scenario
+- `discount_rate` is an annual percentage (e.g. `5.0` for 5%), not a fraction.
+- `horizon_years`: the related asset's `remaining_useful_life` (minimum 1).
+- `repair_npv`: `repair_cost` at year 0 plus `maintenance_cost` discounted annually over
+  `horizon_years`.
+- `replacement_npv`: `replacement_cost` at year 0 plus half of `maintenance_cost` discounted
+  annually over `horizon_years`.
+- `lifecycle_cost` / `npv`: the lower of `repair_npv` and `replacement_npv` (both fields return the
+  same value).
+- `recommended_option`: `"Replace"` if `replacement_npv < repair_npv`, otherwise `"Repair"`.
 
 ### Update Scenario
 
@@ -671,7 +735,9 @@ DELETE /api/scenarios/{id}/
 
 ## Reports API
 
-Generate and export reports.
+Generate and export reports. There are **4** report definitions (not 3), and there is **no**
+`GET /api/reports/{id}/` detail route — the `ReportViewSet` never defines `retrieve`, so that URL
+returns `404`. Only `list`, `prioritisation`, and `export` exist.
 
 ### List Reports
 
@@ -680,69 +746,111 @@ Generate and export reports.
 GET /api/reports/
 ```
 
+Not paginated — always returns a plain array. `updated` is always today's date (computed at
+request time, not stored per-report).
+
 **Response:**
 ```json
 [
   {
     "id": 1,
     "title": "Asset Lifecycle Report",
-    "description": "Full inventory with condition, RUL, and replacement timing.",
-    "updated": "2025-04-22"
+    "description": "Full inventory with condition, RUL, lifecycle stage and criticality.",
+    "updated": "2026-07-06"
   },
   {
     "id": 2,
     "title": "CAPEX Analysis",
-    "description": "Budget vs spend across all capital projects, ROI, variance.",
-    "updated": "2025-04-20"
+    "description": "Budget vs spend across all capital projects.",
+    "updated": "2026-07-06"
   },
   {
     "id": 3,
-    "title": "Risk Prioritization",
-    "description": "Ranked risk register with PoF/CoF scoring & mitigation status.",
-    "updated": "2025-04-18"
+    "title": "Risk Register",
+    "description": "Ranked risk register with PoF/CoF scoring and criticality.",
+    "updated": "2026-07-06"
+  },
+  {
+    "id": 4,
+    "title": "Intervention Prioritisation",
+    "description": "Ranked interventions by (risk × criticality) / RUL with recommended action.",
+    "updated": "2026-07-06"
   }
 ]
 ```
 
-### Get Report Details
+### Get Prioritisation Data
+
+Returns the same ranked intervention data used by report `4`'s export, as JSON — useful for a
+dashboard/summary view instead of a file download.
 
 **Request:**
 ```http
-GET /api/reports/{id}/
+GET /api/reports/prioritisation/
 ```
 
 **Response:**
 ```json
 {
-  "id": 1,
-  "title": "Asset Lifecycle Report",
-  "description": "Full inventory with condition, RUL, and replacement timing.",
-  "updated": "2025-04-22"
+  "summary": {
+    "total": 12,
+    "critical": 2,
+    "high": 3,
+    "medium": 4,
+    "low": 3
+  },
+  "results": [
+    {
+      "risk_id": 1,
+      "asset_id": 1,
+      "asset_name": "Boiler A-12",
+      "asset_type": "Mechanical",
+      "location": "Building B, Floor 3",
+      "lifecycle_stage": "renewal",
+      "recommended_intervention": "Replacement",
+      "remaining_useful_life": 5,
+      "probability_of_failure": 2.5,
+      "consequence_of_failure": 4.0,
+      "criticality": 3.0,
+      "risk_score": 10.0,
+      "combined_score": 30.0,
+      "urgency_score": 6.0,
+      "band": "Medium",
+      "rank": 1
+    }
+  ]
 }
 ```
+
+**Notes:**
+- Sorted by `urgency_score` descending (`combined_score / remaining_useful_life`).
+- `recommended_intervention` is derived from the asset's condition/RUL — not the same field as
+  `lifecycle_stage`.
 
 ### Export Report
 
 **Request:**
 ```http
-GET /api/reports/{id}/export/?format={format}
+GET /api/reports/{id}/export/?fmt={format}
 ```
 
+Only valid for report IDs `1`–`4`; any other ID returns a plain-text `404` body (not JSON).
+
 **Parameters:**
-- `format`: `pdf` (default) or `csv`
+- `fmt` (or `format`, both accepted): `pdf` (default) or `csv`
 
 **Examples:**
 
 **PDF Export:**
 ```bash
-curl -X GET "http://localhost:8000/api/reports/1/export/?format=pdf" \
+curl -X GET "http://localhost:8000/api/reports/1/export/?fmt=pdf" \
   -H "Accept: application/pdf" \
   -o report.pdf
 ```
 
 **CSV Export:**
 ```bash
-curl -X GET "http://localhost:8000/api/reports/1/export/?format=csv" \
+curl -X GET "http://localhost:8000/api/reports/1/export/?fmt=csv" \
   -H "Accept: text/csv" \
   -o report.csv
 ```
@@ -762,7 +870,11 @@ GET /api/assets/?page=2&page_size=50
 | Parameter | Type | Default | Max |
 |-----------|------|---------|-----|
 | `page` | integer | 1 | N/A |
-| `page_size` | integer | 100 | 1000 |
+
+**`page_size` is not supported.** The API uses plain DRF `PageNumberPagination` with
+`PAGE_SIZE = 10` and no `page_size_query_param` configured, so every paginated list returns 10
+results per page regardless of query string — passing `?page_size=` has no effect. (This applies
+to `assets`, `conditions`, `risks`, `projects`, `scenarios` — `reports` is not paginated.)
 
 ### Response
 
@@ -784,12 +896,25 @@ GET /api/assets/?page=2&page_size=50
 
 ## Filtering & Search
 
+Per-resource filter/search/ordering fields, straight from each `ViewSet`:
+
+| Resource | `filterset_fields` (exact-match) | `search_fields` | `ordering_fields` |
+|---|---|---|---|
+| assets | `asset_type`, `location`, `status`, `lifecycle_stage` | `name`, `asset_type`, `location`, `status`, `lifecycle_stage` | `installation_date`, `remaining_useful_life`, `condition_rating`, `criticality` |
+| conditions | `asset`, `inspection_date` | `asset__name`, `notes` | `inspection_date`, `condition_score` |
+| risks | `asset` | `asset__name` | `probability_of_failure`, `consequence_of_failure` |
+| projects | `asset`, `status`, `start_date`, `end_date` | `name`, `responsible_person`, `status` | `start_date`, `end_date`, `budget` |
+| scenarios | `asset`, `discount_rate` | `asset__name` | `repair_cost`, `replacement_cost`, `maintenance_cost` |
+
+Note there is **no server-side ordering by `computed_risk_score` or `combined_score`** on
+`/api/risks/` — sort those client-side after fetching.
+
 ### Search (Full-Text)
 
 **Request:**
 ```bash
 GET /api/assets/?search=boiler
-GET /api/conditions/?search=John%20Smith
+GET /api/conditions/?search=leak
 ```
 
 ### Field Filtering
@@ -802,13 +927,14 @@ GET /api/projects/?status=Active
 GET /api/risks/?asset=1
 ```
 
-### Date Filtering
+`filterset_fields` entries default to exact match; date fields (`inspection_date`, `start_date`,
+`end_date`) also support Django's standard lookup suffixes:
 
 **Request:**
 ```bash
-GET /api/conditions/?assessment_date=2025-04-22
-GET /api/conditions/?assessment_date__gte=2025-01-01
-GET /api/conditions/?assessment_date__lte=2025-12-31
+GET /api/conditions/?inspection_date=2025-04-22
+GET /api/conditions/?inspection_date__gte=2025-01-01
+GET /api/conditions/?inspection_date__lte=2025-12-31
 ```
 
 **Available Date Filters:**
@@ -824,19 +950,19 @@ GET /api/conditions/?assessment_date__lte=2025-12-31
 ```bash
 GET /api/assets/?ordering=name
 GET /api/assets/?ordering=-condition_rating
-GET /api/risks/?ordering=-computed_risk_score
+GET /api/risks/?ordering=-consequence_of_failure
 ```
 
 **Notes:**
 - Prefix with `-` for descending order
-- Available fields depend on the resource
+- Only fields listed in `ordering_fields` above are accepted; anything else is silently ignored
 
 ### Combining Filters
 
 **Request:**
 ```bash
 GET /api/assets/?asset_type=Mechanical&status=Operational&ordering=-condition_rating
-GET /api/conditions/?asset=1&assessment_date__gte=2025-01-01&ordering=-assessment_date
+GET /api/conditions/?asset=1&inspection_date__gte=2025-01-01&ordering=-inspection_date
 ```
 
 ---
@@ -846,11 +972,10 @@ GET /api/conditions/?asset=1&assessment_date__gte=2025-01-01&ordering=-assessmen
 ### Get All Critical Risks
 
 ```bash
-# First, get all risks
+# First, get all risks (or use /api/reports/prioritisation/ for pre-computed bands)
 curl http://localhost:8000/api/risks/
 
-# Then filter in frontend based on computed_risk_score >= 100
-# Or implement custom endpoint
+# Then filter client-side on combined_score >= 100 (the "Critical" band threshold)
 ```
 
 ### Get Assets Needing Maintenance
@@ -859,10 +984,10 @@ curl http://localhost:8000/api/risks/
 curl "http://localhost:8000/api/assets/?status=Maintenance"
 ```
 
-### Get Recent Condition Assessments
+### Get Recent Condition Inspections
 
 ```bash
-curl "http://localhost:8000/api/conditions/?ordering=-assessment_date&page_size=10"
+curl "http://localhost:8000/api/conditions/?ordering=-inspection_date"
 ```
 
 ### Get Active Projects for Specific Asset
@@ -876,7 +1001,8 @@ curl "http://localhost:8000/api/projects/?asset=1&status=Active"
 ```bash
 curl "http://localhost:8000/api/scenarios/?asset=1"
 
-# Response includes computed_npv for each scenario
+# Response includes npv, repair_npv, replacement_npv, lifecycle_cost, recommended_option
+# and horizon_years for each scenario
 ```
 
 ---
@@ -891,17 +1017,17 @@ Future versions may implement rate limiting.
 
 ## CORS
 
-**Allowed Origins:**
+**Always-allowed dev origins** (hardcoded in `settings.py`, in addition to whatever
+`CORS_ALLOWED_ORIGINS`/`CORS_ALLOWED_ORIGIN_REGEXES` env vars add for production):
+- http://localhost:5173
 - http://localhost:8080
-- http://localhost:8081
+- http://127.0.0.1:5173
 - http://127.0.0.1:8080
 
-Configure in backend `settings.py`:
-```python
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-    "http://localhost:8081",
-]
+Production origins are read from the environment, not hardcoded:
+```bash
+CORS_ALLOWED_ORIGINS=https://lcca-cppm.vercel.app,https://lcca-cppm-pj.vercel.app
+CORS_ALLOWED_ORIGIN_REGEXES=...   # e.g. to allow every Vercel preview deployment
 ```
 
 ---
@@ -925,15 +1051,14 @@ curl -X POST http://localhost:8000/api/assets/ \
   }'
 # Response: Asset ID = 1
 
-# 2. Create a condition assessment
+# 2. Create a condition inspection
 curl -X POST http://localhost:8000/api/conditions/ \
   -H "Content-Type: application/json" \
   -d '{
     "asset": 1,
-    "assessment_date": "2025-04-22",
-    "rating": 3.5,
-    "notes": "Operational",
-    "inspector": "Tech A"
+    "inspection_date": "2025-04-22",
+    "condition_score": 3.5,
+    "notes": "Operational"
   }'
 
 # 3. Create a risk assessment
@@ -962,17 +1087,20 @@ curl -X POST http://localhost:8000/api/projects/ \
   -d '{
     "name": "Boiler Replacement",
     "asset": 1,
+    "scope_description": "Full replacement of primary boiler unit.",
     "budget": 25000,
-    "spent": 0,
     "status": "Planning",
-    "start_date": "2025-06-01"
+    "start_date": "2025-06-01",
+    "end_date": "2025-12-01",
+    "responsible_person": "Jane Doe"
   }'
 
-# 6. Get report
+# 6. Get reports list, or the pre-computed prioritisation view
 curl http://localhost:8000/api/reports/
+curl http://localhost:8000/api/reports/prioritisation/
 
-# 7. Export report
-curl http://localhost:8000/api/reports/1/export/?format=pdf -o report.pdf
+# 7. Export report (fmt or format both work)
+curl http://localhost:8000/api/reports/1/export/?fmt=pdf -o report.pdf
 ```
 
 ---
@@ -988,4 +1116,7 @@ curl http://localhost:8000/api/reports/1/export/?format=pdf -o report.pdf
 
 ---
 
-**Last Updated:** May 2026
+**Last Updated:** July 2026 — corrected against current backend source (models/serializers/views),
+not just endpoint shape. See notes inline for fields/routes that previously didn't match reality
+(Conditions field names, Projects `spent`, Scenarios computed fields, Risks `criticality`/
+`combined_score`, the 4th report + `/prioritisation/` route, and `page_size` not being supported).

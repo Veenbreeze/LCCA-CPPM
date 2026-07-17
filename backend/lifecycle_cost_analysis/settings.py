@@ -189,7 +189,13 @@ CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_DEV_ORIGINS + _ENV_ORIGINS))
 
 # Optional: allow Vercel preview URLs via regex.
 # Default permits any *.vercel.app subdomain when DEBUG is on; tighten in production.
-_DEFAULT_REGEXES = [r"^https://.*\.vercel\.app$"] if DEBUG else []
+# Also permits any localhost/127.0.0.1 port when DEBUG is on, since `flutter run -d chrome`
+# picks an arbitrary port each time rather than a fixed one.
+_DEFAULT_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+    r"^http://localhost:\d+$",
+    r"^http://127\.0\.0\.1:\d+$",
+] if DEBUG else []
 _ENV_REGEXES = [
     pattern.strip()
     for pattern in os.getenv("CORS_ALLOWED_ORIGIN_REGEXES", "").split(",")

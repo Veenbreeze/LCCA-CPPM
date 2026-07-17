@@ -19,6 +19,7 @@ import {
   type ScenarioCreatePayload,
   type ScenarioRecord,
 } from "@/services/scenarioService";
+import { formatCurrency } from "@/lib/utils";
 
 export const Route = createFileRoute("/scenario")({ component: ScenarioPage });
 
@@ -71,11 +72,12 @@ function ScenarioPage() {
     }
     setIsSubmitting(true);
     try {
+      const payloadWithDefaults = payload as Omit<ScenarioRecord, "id" | "npv">;
       if (editing) {
-        await update(editing.id, payload);
+        await update(editing.id, payloadWithDefaults);
         toast.success("Scenario updated successfully.");
       } else {
-        await create(payload);
+        await create(payloadWithDefaults);
         toast.success("Scenario saved successfully.");
       }
       setOpen(false);
@@ -105,12 +107,12 @@ function ScenarioPage() {
         </Card>
         <Card>
           <CardTitle>Average NPV</CardTitle>
-          <div className="mt-4 text-3xl font-semibold">${summary.average.toFixed(0)}</div>
+          <div className="mt-4 text-3xl font-semibold">{formatCurrency(summary.average)}</div>
         </Card>
         <Card>
           <CardTitle>Best Scenario</CardTitle>
           <div className="mt-4 text-3xl font-semibold">
-            ${bestScenario ? bestScenario.npv.toFixed(0) : "—"}
+            {bestScenario ? formatCurrency(bestScenario.npv) : "—"}
           </div>
           <div className="mt-2 text-xs text-muted-foreground">
             {bestScenario ? assetMap.get(bestScenario.asset) : "No scenario selected"}
@@ -156,6 +158,7 @@ function ScenarioPage() {
                   tickLine={false}
                 />
                 <Tooltip
+                  formatter={(value: number) => formatCurrency(Number(value))}
                   contentStyle={{
                     borderRadius: 8,
                     border: "1px solid oklch(0.92 0.01 250)",
@@ -198,11 +201,11 @@ function ScenarioPage() {
               {scenarios.map((scenario) => (
                 <tr key={scenario.id} className="border-b border-border hover:bg-muted/40">
                   <td className="px-3 py-3 font-medium">{assetMap.get(scenario.asset) ?? `Asset ${scenario.asset}`}</td>
-                  <td className="px-3 py-3">${Number(scenario.repair_cost).toLocaleString()}</td>
-                  <td className="px-3 py-3">${Number(scenario.replacement_cost).toLocaleString()}</td>
-                  <td className="px-3 py-3">${Number(scenario.maintenance_cost).toLocaleString()}</td>
+                  <td className="px-3 py-3">{formatCurrency(Number(scenario.repair_cost))}</td>
+                  <td className="px-3 py-3">{formatCurrency(Number(scenario.replacement_cost))}</td>
+                  <td className="px-3 py-3">{formatCurrency(Number(scenario.maintenance_cost))}</td>
                   <td className="px-3 py-3">{Number(scenario.discount_rate).toFixed(2)}%</td>
-                  <td className="px-3 py-3 font-semibold">${Number(scenario.npv).toFixed(0)}</td>
+                  <td className="px-3 py-3 font-semibold">{formatCurrency(Number(scenario.npv))}</td>
                   <td className="px-3 py-3 text-right">
                     <div className="flex justify-end gap-1">
                       <button
@@ -323,7 +326,7 @@ function ScenarioModal({
               ))}
             </select>
           </Label>
-          <Label field="Repair Cost">
+          <Label field="Repair Cost (TZS)">
             <input
               type="number"
               value={form.repair_cost}
@@ -331,7 +334,7 @@ function ScenarioModal({
               className="input"
             />
           </Label>
-          <Label field="Replacement Cost">
+          <Label field="Replacement Cost (TZS)">
             <input
               type="number"
               value={form.replacement_cost}
@@ -339,7 +342,7 @@ function ScenarioModal({
               className="input"
             />
           </Label>
-          <Label field="Maintenance Cost">
+          <Label field="Maintenance Cost (TZS)">
             <input
               type="number"
               value={form.maintenance_cost}

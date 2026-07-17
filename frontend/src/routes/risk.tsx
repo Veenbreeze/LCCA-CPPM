@@ -109,12 +109,12 @@ function RiskPage() {
     }
     const pof = Number(payload.probability_of_failure);
     const cof = Number(payload.consequence_of_failure);
-    if (!(pof >= 1 && pof <= 5)) {
-      setFormError("Probability of Failure must be between 1 and 5.");
+    if (!(pof >= 1 && pof <= 10)) {
+      setFormError("Probability of Failure must be between 1 and 10.");
       return;
     }
-    if (!(cof >= 1 && cof <= 5)) {
-      setFormError("Consequence of Failure must be between 1 and 5.");
+    if (!(cof >= 1 && cof <= 10)) {
+      setFormError("Consequence of Failure must be between 1 and 10.");
       return;
     }
     setSubmitting(true);
@@ -211,12 +211,12 @@ function RiskPage() {
                   C{cof}
                 </div>
               ))}
-              {[5, 4, 3, 2, 1].map((pof) => (
+              {Array.from({ length: 10 }, (_, i) => 10 - i).map((pof) => (
                 <div key={`row${pof}`} className="contents">
                   <div className="flex items-center justify-end pr-2 text-[11px] font-medium text-muted-foreground">
                     P{pof}
                   </div>
-                  {[1, 2, 3, 4, 5].map((cof) => {
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((cof) => {
                     const product = pof * cof;
                     const tone =
                       product >= 64

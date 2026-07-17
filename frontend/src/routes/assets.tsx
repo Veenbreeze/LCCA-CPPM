@@ -15,7 +15,7 @@ export const Route = createFileRoute("/assets")({ component: AssetsPage });
 type AssetForm = Omit<AssetRecord, "id">;
 
 const statusVariant = (status: AssetRecord["status"]) =>
-  status === "Operational" ? "success" : status === "Under Maintenance" ? "warning" : "muted";
+  status === "Installation" ? "success" : status === "Operational" ? "success" : status === "Under Maintenance" ? "warning" : "muted";
 
 function AssetsPage() {
   const { assets, loading, error, create, update, remove } = useAssets();
@@ -345,6 +345,7 @@ function AssetModal({
               onChange={(e) => setForm({ ...form, status: e.target.value })}
               className="input"
             >
+              <option>Installation</option>
               <option>Operational</option>
               <option>Under Maintenance</option>
               <option>Decommissioned</option>

@@ -167,6 +167,7 @@ For detailed API documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.m
 - **[API Documentation](./API_DOCUMENTATION.md)** - Complete API reference with request/response examples
 - **[Development Guide](./DEVELOPMENT.md)** - Development workflow and best practices
 - **[Deployment Guide](./DEPLOYMENT.md)** - Vercel (frontend) + Render/Railway (backend) deployment walkthrough
+- **[Mobile App Requirements](./MOBILE_APP_REQUIREMENTS.md)** - Requirements and spec for a staff/inspector companion mobile app
 
 ---
 

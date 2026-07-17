@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Edit2, Trash2, X } from "lucide-react";
+import { Plus, Edit2, Trash2, X, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Card, CardTitle, Badge, Alert } from "@/components/ui-kit";
 import { useProjects } from "@/hooks/useProjects";
 import { useAssets } from "@/hooks/useAssets";
+import { useRecommendations } from "@/hooks/useRecommendations";
 import { type ProjectRecord } from "@/services/projectService";
+import { formatCurrency } from "@/lib/utils";
 
 export const Route = createFileRoute("/projects")({ component: ProjectsPage });
 
@@ -24,12 +26,19 @@ const statusVariant = (status: ProjectRecord["status"]) =>
 function ProjectsPage() {
   const { projects, loading, error, create, update, remove } = useProjects();
   const { assets } = useAssets();
+  const {
+    recommendations,
+    loading: recommendationsLoading,
+    error: recommendationsError,
+    remove: removeRecommendation,
+  } = useRecommendations();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<ProjectRecord | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const assetMap = useMemo(() => new Map(assets.map((asset) => [asset.id, asset.name])), [assets]);
+  const projectMap = useMemo(() => new Map(projects.map((project) => [project.id, project.name])), [projects]);
 
   const resourceSpan = useMemo(() => {
     const dates = projects.flatMap((project) => [
@@ -104,6 +113,71 @@ function ProjectsPage() {
       {error ? <Alert variant="destructive">{error}</Alert> : null}
 
       <Card className="mb-6">
+        <CardTitle
+          subtitle="What field engineers reported after visiting a project site — use these to decide next steps."
+        >
+          Field Recommendations
+        </CardTitle>
+        {recommendationsError ? <Alert variant="destructive">{recommendationsError}</Alert> : null}
+        <div className="space-y-3">
+          {recommendationsLoading && !recommendations.length ? (
+            <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
+              Loading recommendations…
+            </div>
+          ) : null}
+          {!recommendationsLoading && !recommendations.length ? (
+            <div className="flex items-center gap-2 rounded-lg border border-border p-4 text-sm text-muted-foreground">
+              <ClipboardList className="h-4 w-4" />
+              No field recommendations submitted yet.
+            </div>
+          ) : null}
+          {recommendations.map((item) => (
+            <div key={item.id} className="rounded-lg border border-border p-4">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-foreground">
+                    {projectMap.get(item.project) ?? `Project #${item.project}`}
+                  </div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">
+                    {item.engineer_name} · {new Date(item.submitted_at).toLocaleString()}
+                  </div>
+                </div>
+                <button
+                  aria-label="Dismiss recommendation"
+                  onClick={async () => {
+                    if (!confirm("Dismiss this recommendation?")) return;
+                    try {
+                      await removeRecommendation(item.id);
+                      toast.success("Recommendation dismissed.");
+                    } catch (err) {
+                      toast.error((err as Error).message);
+                    }
+                  }}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Work done
+                  </div>
+                  <p className="mt-1 text-sm text-foreground">{item.work_done}</p>
+                </div>
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Recommendation
+                  </div>
+                  <p className="mt-1 text-sm text-foreground">{item.recommendation}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="mb-6">
         <CardTitle>Project Timeline</CardTitle>
         <div className="space-y-3">
           {timelineProjects.map((project) => (
@@ -121,7 +195,7 @@ function ProjectsPage() {
                   title={`${project.start_date} → ${project.end_date}`}
                 >
                   <span className="text-[10px] font-medium truncate">
-                    ${Number(project.budget).toLocaleString()} · {project.status}
+                    {formatCurrency(Number(project.budget))} · {project.status}
                   </span>
                 </div>
               </div>
@@ -157,7 +231,7 @@ function ProjectsPage() {
                   <td className="px-3 py-3 text-muted-foreground">
                     {assetMap.get(project.asset) ?? project.asset}
                   </td>
-                  <td className="px-3 py-3">${Number(project.budget).toLocaleString()}</td>
+                  <td className="px-3 py-3">{formatCurrency(Number(project.budget))}</td>
                   <td className="px-3 py-3 text-xs text-muted-foreground">
                     {project.start_date} → {project.end_date}
                   </td>
@@ -314,7 +388,7 @@ function ProjectModal({
               className="input"
             />
           </Label>
-          <Label field="Budget (USD)">
+          <Label field="Budget (TZS)">
             <input
               aria-label="Project budget"
               placeholder="125000"

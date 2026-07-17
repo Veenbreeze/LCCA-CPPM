@@ -146,6 +146,26 @@ Quick navigation guide for all documentation files in Asset Lifecycle Insight.
 
 ---
 
+### 6. **MOBILE_APP_REQUIREMENTS.md**
+**Purpose:** Requirements and spec for a staff/inspector companion mobile app
+
+**Contains:**
+- Purpose, target users, and v1 scope (read-only)
+- Functional requirements per resource (dashboard, assets, conditions, risk, projects, scenarios, reports)
+- Non-functional requirements (performance, offline tolerance, currency formatting, accessibility)
+- Information architecture and screen-by-screen spec
+- API integration notes (built on top of API_DOCUMENTATION.md)
+- Visual design requirements (matching the web app's brand)
+- Recommended tech stack
+- Environment/networking setup for a physical device
+- Security requirements
+- Acceptance criteria and post-v1 roadmap
+- Open questions for the backend team
+
+**Best for:** Mobile developers, product/project managers scoping the mobile build
+
+---
+
 ## 🎯 Quick Navigation by Role
 
 ### I'm a **Backend Developer**
@@ -175,6 +195,11 @@ Quick navigation guide for all documentation files in Asset Lifecycle Insight.
 1. Start with: `README.md`
 2. Read: `API_DOCUMENTATION.md`
 3. Reference examples as needed
+
+### I'm a **Mobile Developer**
+1. Start with: `MOBILE_APP_REQUIREMENTS.md`
+2. Reference: `API_DOCUMENTATION.md` for endpoint/field details
+3. Check: Open Questions section before finalizing auth/offline design
 
 ### I'm a **Project Manager/Non-Technical**
 1. Read: `README.md` (Features & Overview)

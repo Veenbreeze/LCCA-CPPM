@@ -35,6 +35,7 @@ import { useAssets } from "@/hooks/useAssets";
 import { useProjects } from "@/hooks/useProjects";
 import { useRisk } from "@/hooks/useRisk";
 import { useNotifications } from "@/hooks/use-notifications";
+import { formatCurrency } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({ component: Dashboard });
 
@@ -107,14 +108,14 @@ function Dashboard() {
     value: Number(project.budget),
   }));
 
-  const heatmap = Array.from({ length: 5 }, (_, pofIdx) =>
-    Array.from({ length: 5 }, (_, cofIdx) => {
+  const heatmap = Array.from({ length: 10 }, (_, pofIdx) =>
+    Array.from({ length: 10 }, (_, cofIdx) => {
       const pof = pofIdx + 1;
       const cof = cofIdx + 1;
       return risks.filter(
         (risk) =>
-          Math.min(5, Math.max(1, Math.round(Number(risk.probability_of_failure)))) === pof &&
-          Math.min(5, Math.max(1, Math.round(Number(risk.consequence_of_failure)))) === cof,
+          Math.min(10, Math.max(1, Math.round(Number(risk.probability_of_failure)))) === pof &&
+          Math.min(10, Math.max(1, Math.round(Number(risk.consequence_of_failure)))) === cof,
       ).length;
     }),
   );
@@ -184,7 +185,7 @@ function Dashboard() {
               },
               {
                 label: "CAPEX programme",
-                value: loading ? "—" : "$" + (totalCapex / 1_000_000).toFixed(2) + "M",
+                value: loading ? "—" : "TSh " + (totalCapex / 1_000_000).toFixed(2) + "M",
               },
             ].map((item) => (
               <div key={item.label}>
@@ -234,7 +235,7 @@ function Dashboard() {
         />
         <StatCard
           label="Total CAPEX Budget"
-          value={loading ? "…" : `$${(totalCapex / 1_000_000).toFixed(2)}M`}
+          value={loading ? "…" : `TSh ${(totalCapex / 1_000_000).toFixed(2)}M`}
           hint={`${projects.length} projects`}
           icon={Wallet}
           accent="info"
@@ -341,7 +342,7 @@ function Dashboard() {
                     fontSize: 12,
                     boxShadow: "0 4px 12px oklch(0.18 0.04 252 / 0.08)",
                   }}
-                  formatter={(value: any) => `$${Number(value).toLocaleString()}`}
+                  formatter={(value: any) => formatCurrency(Number(value))}
                 />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
@@ -379,16 +380,16 @@ function Dashboard() {
         </Card>
 
         <Card>
-          <CardTitle subtitle="Asset count per PoF × CoF cell">Risk Heatmap</CardTitle>
-          <div className="space-y-1">
-            <div className="flex">
+          <CardTitle subtitle="Asset count per PoF × CoF cell (1–10 scale)">Risk Heatmap</CardTitle>
+          <div className="space-y-1 overflow-x-auto">
+            <div className="flex min-w-[420px]">
               <div className="w-9" />
-              {[1, 2, 3, 4, 5].map((cof) => (
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((cof) => (
                 <div
                   key={cof}
-                  className="flex-1 text-center text-[10px] font-semibold text-muted-foreground"
+                  className="flex-1 text-center text-[9px] font-semibold text-muted-foreground"
                 >
-                  CoF {cof}
+                  C{cof}
                 </div>
               ))}
             </div>
@@ -396,26 +397,26 @@ function Dashboard() {
               .slice()
               .reverse()
               .map((row, rowIndex) => {
-                const pof = 5 - rowIndex;
+                const pof = 10 - rowIndex;
                 return (
-                  <div key={pof} className="flex items-center gap-1">
-                    <div className="w-9 text-[10px] font-semibold text-muted-foreground">
-                      PoF {pof}
+                  <div key={pof} className="flex min-w-[420px] items-center gap-1">
+                    <div className="w-9 text-[9px] font-semibold text-muted-foreground">
+                      P{pof}
                     </div>
                     {row.map((cell, cofIndex) => {
                       const score = pof * (cofIndex + 1);
                       const bg =
-                        score >= 20
+                        score >= 64
                           ? "bg-destructive"
-                          : score >= 12
+                          : score >= 40
                             ? "bg-warning"
-                            : score >= 6
+                            : score >= 20
                               ? "bg-info"
                               : "bg-success";
                       return (
                         <div
                           key={cofIndex}
-                          className={`flex-1 aspect-square rounded-md ${bg} ${cell === 0 ? "opacity-25" : "opacity-95"} flex items-center justify-center text-[11px] font-bold text-white shadow-xs num`}
+                          className={`flex-1 aspect-square rounded-md ${bg} ${cell === 0 ? "opacity-25" : "opacity-95"} flex items-center justify-center text-[10px] font-bold text-white shadow-xs num`}
                           title={`PoF ${pof} × CoF ${cofIndex + 1} = ${score}, ${cell} asset(s)`}
                         >
                           {cell || ""}

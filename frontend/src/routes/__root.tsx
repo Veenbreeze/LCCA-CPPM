@@ -29,7 +29,7 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { rel: "icon", href: "https://www.flaticon.com/free-icon/bailout_16961410" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "LCA·CPPM — Lifecycle Cost & Capital Project Portfolio" },
+      { title: "LCCA-CPPM" },
       { name: "description", content: "Enterprise-grade Lifecycle Cost Analysis and Capital Project Portfolio Management dashboard." },
     ],
     links: [

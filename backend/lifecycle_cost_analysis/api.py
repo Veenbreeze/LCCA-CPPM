@@ -25,7 +25,7 @@ from assets.models import Asset
 from assets.views import AssetViewSet
 from conditions.views import ConditionViewSet
 from projects.models import Project
-from projects.views import ProjectViewSet
+from projects.views import ProjectViewSet, RecommendationViewSet
 from risk.models import Risk
 from risk.views import RiskViewSet
 from scenarios.views import ScenarioViewSet
@@ -118,7 +118,7 @@ def _capex_rows():
                 project.name,
                 project.asset.name,
                 project.status,
-                f"${float(project.budget):,.0f}",
+                f"TSh {float(project.budget):,.0f}",
                 str(project.start_date),
                 str(project.end_date),
                 project.responsible_person,
@@ -290,16 +290,16 @@ class ReportViewSet(viewsets.ViewSet):
             ]
             rows, total, by_status = _capex_rows()
             status_summary = "; ".join(
-                f"{name}: ${float(amount):,.0f}" for name, amount in by_status.items()
+                f"{name}: TSh {float(amount):,.0f}" for name, amount in by_status.items()
             )
             summary_text = (
-                f"<b>Total budget:</b> ${float(total):,.0f} &nbsp;&nbsp; "
+                f"<b>Total budget:</b> TSh {float(total):,.0f} &nbsp;&nbsp; "
                 f"<b>{len(rows)}</b> projects. {status_summary}"
             )
             if fmt == "csv":
                 csv_rows = list(rows) + [
                     [],
-                    ["TOTAL", "", "", f"${float(total):,.0f}", "", "", ""],
+                    ["TOTAL", "", "", f"TSh {float(total):,.0f}", "", "", ""],
                 ]
                 return _csv_response(f"{filename_base}.csv", headers, csv_rows)
             pdf = _build_pdf(
@@ -391,6 +391,7 @@ router.register(r'assets', AssetViewSet)
 router.register(r'conditions', ConditionViewSet)
 router.register(r'risks', RiskViewSet)
 router.register(r'projects', ProjectViewSet)
+router.register(r'recommendations', RecommendationViewSet)
 router.register(r'scenarios', ScenarioViewSet)
 router.register(r'reports', ReportViewSet, basename='reports')
 

@@ -13,3 +13,17 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Recommendation(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="recommendations")
+    engineer_name = models.CharField(max_length=255)
+    work_done = models.TextField()
+    recommendation = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-submitted_at"]
+
+    def __str__(self):
+        return f"Recommendation for {self.project.name} by {self.engineer_name}"
